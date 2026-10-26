@@ -15,7 +15,6 @@ var db={doc:function(p){return{id:p.split("/").pop(),path:p,get:function(){retur
 var user={id:function(){return Promise.resolve("u_local")},can:function(){return Promise.resolve(true)},canEdit:function(){return Promise.resolve(true)},isOwner:function(){return Promise.resolve(true)},profiles:function(ids){var o={};ids.forEach(function(i){o[i]={name:""}});return Promise.resolve(o)}};
 var dl={save:function(r){var b=r.data instanceof Blob?r.data:new Blob([r.data]);var u=URL.createObjectURL(b);var a=document.createElement("a");a.href=u;a.download=r.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove()},1000);return Promise.resolve({status:"saved"})}};
 window.claude={use:function(n){return Promise.resolve(n==="db"?db:n==="user"?user:n==="downloads"?dl:null)}};
-document.addEventListener("DOMContentLoaded",function(){var b=document.createElement("div");b.textContent="Copia sin conexión · datos del corte 26-oct-2026 · los cambios se pierden al cerrar la página. La versión de trabajo en línea está en claude.ai.";b.style.cssText="background:#FBEFD6;color:#7a4d00;font:600 12.5px Arial,sans-serif;padding:6px 16px;text-align:center;border-bottom:1px solid #e3c27a";document.body.insertBefore(b,document.body.firstChild)});
 })();
 </script>
 <title>Strategy App</title>
