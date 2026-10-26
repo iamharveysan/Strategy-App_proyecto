@@ -1,0 +1,4 @@
+juan-valdez: MEFE 2.545 · MEFI 2.710 · IE V · corte BCG 9.39 % · alertas []
+seguros-sura: MEFE 2.700 · MEFI 2.680 · IE V · corte BCG 9.39 % · alertas []
+
+Chequeos: 214 · diferencias: 0

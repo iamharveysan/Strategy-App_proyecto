@@ -1,0 +1,1277 @@
+{
+ "nombre": "Corte 26-oct-2026 · versión de cierre auditada",
+ "fecha": "2026-10-26T20:20:00.000Z",
+ "empresa": {
+  "adlMadurez": "madurez",
+  "adlPosicion": "fuerte",
+  "bcgCorte": 8,
+  "bcgCorteModo": "auto",
+  "comparacion": "anual",
+  "conclusiones": "Ejemplo de redacción para el equipo:\n1. Los ingresos responden sobre todo al consumo de los hogares: inflación y crecimiento económico aparecen como las variables de mayor peso.\n2. La marca y la red de tiendas son la principal fortaleza; la exposición al precio internacional del café y a la tasa de cambio es la principal vulnerabilidad.\n3. La posición en la matriz interna-externa sugiere estrategias de crecimiento selectivo apoyadas en canales digitales y mercados internacionales.",
+  "deudaUSD": "nsa",
+  "dolarNota": "ILUSTRATIVO: se marcó 'vende en el exterior' porque la marca opera tiendas fuera de Colombia. Confirmar importaciones y deuda en dólares con el informe de gestión.",
+  "editadoEn": "2026-10-26T19:32:20.667Z",
+  "editadoPor": "u_czMdQZ7Msz3dzBUacBq9OA",
+  "exporta": "si",
+  "finUnidad": "miles de millones de COP",
+  "financieros": [
+   {
+    "activos": 520,
+    "anio": 2023,
+    "egresos": 585,
+    "fuente": "ILUSTRATIVO · reemplazar con el informe de gestión",
+    "ingresos": 600,
+    "pasivos": 300,
+    "patrimonio": 220,
+    "utilidad": 15,
+    "verificacion": "ilustrativo"
+   },
+   {
+    "activos": 560,
+    "anio": 2024,
+    "egresos": 628,
+    "fuente": "ILUSTRATIVO · reemplazar con el informe de gestión",
+    "ingresos": 640,
+    "pasivos": 330,
+    "patrimonio": 230,
+    "utilidad": 12,
+    "verificacion": "ilustrativo"
+   },
+   {
+    "activos": 600,
+    "anio": 2025,
+    "egresos": 672,
+    "fuente": "ILUSTRATIVO · reemplazar con el informe de gestión",
+    "ingresos": 690,
+    "pasivos": 350,
+    "patrimonio": 250,
+    "utilidad": 18,
+    "verificacion": "ilustrativo"
+   }
+  ],
+  "ilustrativo": true,
+  "importa": "nsa",
+  "ingresos": [
+   {
+    "p": "2022-T1",
+    "v": 92
+   },
+   {
+    "p": "2022-T2",
+    "v": 98
+   },
+   {
+    "p": "2022-T3",
+    "v": 100
+   },
+   {
+    "p": "2022-T4",
+    "v": 118
+   },
+   {
+    "p": "2023-T1",
+    "v": 109.9
+   },
+   {
+    "p": "2023-T2",
+    "v": 114.7
+   },
+   {
+    "p": "2023-T3",
+    "v": 113.1
+   },
+   {
+    "p": "2023-T4",
+    "v": 131.1
+   },
+   {
+    "p": "2024-T1",
+    "v": 116.9
+   },
+   {
+    "p": "2024-T2",
+    "v": 125
+   },
+   {
+    "p": "2024-T3",
+    "v": 124.6
+   },
+   {
+    "p": "2024-T4",
+    "v": 145.7
+   },
+   {
+    "p": "2025-T1",
+    "v": 132.5
+   },
+   {
+    "p": "2025-T2",
+    "v": 139.3
+   },
+   {
+    "p": "2025-T3",
+    "v": 141.2
+   },
+   {
+    "p": "2025-T4",
+    "v": 161.8
+   }
+  ],
+  "ingresosFuente": "ILUSTRATIVO · reemplazar con Informe de gestión integrado de Procafecol S.A.",
+  "ingresosNombre": "Ingresos operacionales, índice ilustrativo (2022-T3 = 100)",
+  "metodoPeso": "exposicion",
+  "nombre": "Juan Valdez",
+  "notaDatos": "Corte de datos macro: 26-oct-2026. Se trabaja solo con información pública. Las series macro (DANE, BanRep) y las proyecciones vienen de fuentes citadas; los trimestres de 2022 a 2025 siguen POR VERIFICAR contra la serie oficial descargada. Los estados financieros, pesos MEFI, unidades BCG, presupuestos, tareas e indicadores son ILUSTRATIVOS: los equipos deben reemplazarlos con las cifras de los informes publicados.",
+  "orden": "1",
+  "razon": "Procafecol S.A.",
+  "sector": "Café · tiendas y consumo masivo",
+  "tipoEmpresa": "comercial",
+  "corteDatos": "26-oct-2026"
+ },
+ "cols": {
+  "variables": [
+   {
+    "id": "v01",
+    "calificacion": "3",
+    "canal": "pib",
+    "codigo": "V-01",
+    "corte": "2026-T2 (publicado ago. 2026)",
+    "efectoSubida": "auto",
+    "exposicionManual": "auto",
+    "fechaConsulta": "2026-10-26",
+    "frecuencia": "Trimestral",
+    "fuente": "DANE",
+    "lectura": "Confirmados en fuentes: 2024-T4 2,4 %; 2025-T4 2,1 % (revisado desde 2,3 %); 2026-T1 2,2 %; 2026-T2 3,5 %; año 2025 2,6 %. Los trimestres anteriores se cargaron como punto de partida y deben contrastarse con la serie oficial descargada antes de cambiar el estado a 'Fuente oficial verificada'.",
+    "nombre": "Crecimiento del PIB",
+    "proy": [
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Cierre 2026",
+      "nota": "Crecimiento anual",
+      "org": "FMI · WEO",
+      "tipo": "anual",
+      "url": "https://www.infobae.com/colombia/2026/10/14/el-fmi-preve-que-la-economia-colombiana-crezca-22-en-2026-y-se-desacelere-frente-a-2025-planteo-una-dificil-realidad-para-2027/",
+      "valor": 2.2
+     },
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Cierre 2027",
+      "nota": "Crecimiento anual",
+      "org": "FMI · WEO",
+      "tipo": "anual",
+      "url": "https://www.infobae.com/colombia/2026/10/14/el-fmi-preve-que-la-economia-colombiana-crezca-22-en-2026-y-se-desacelere-frente-a-2025-planteo-una-dificil-realidad-para-2027/",
+      "valor": 2.3
+     },
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Cierre 2026",
+      "nota": "Crecimiento anual",
+      "org": "Banco Mundial",
+      "tipo": "anual",
+      "url": "https://www.infobae.com/colombia/2026/10/06/banco-mundial-mantuvo-en-23-su-proyeccion-de-crecimiento-para-colombia-en-2026-el-pais-esta-por-encima-del-promedio-regional/",
+      "valor": 2.3
+     },
+     {
+      "fecha": "jun-2026",
+      "horizonte": "Cierre 2026",
+      "nota": "Crecimiento anual",
+      "org": "OCDE",
+      "tipo": "anual",
+      "url": "https://www.larepublica.co/globoeconomia/ocde-ajusta-a-la-baja-crecimiento-de-colombia-y-advierte-de-los-desafios-en-dos-anos-4407351",
+      "valor": 2.4
+     },
+     {
+      "fecha": "jun-2026",
+      "horizonte": "Cierre 2027",
+      "nota": "Crecimiento anual",
+      "org": "OCDE",
+      "tipo": "anual",
+      "url": "https://www.larepublica.co/globoeconomia/ocde-ajusta-a-la-baja-crecimiento-de-colombia-y-advierte-de-los-desafios-en-dos-anos-4407351",
+      "valor": 2.1
+     },
+     {
+      "fecha": "jul-2026",
+      "horizonte": "Cierre 2026",
+      "nota": "Informe de Política Monetaria de julio",
+      "org": "Banco de la República (equipo técnico)",
+      "tipo": "anual",
+      "url": "https://www.portafolio.co/economia/crecimiento/banco-de-la-republica-estima-que-en-el-2026-la-inflacion-cerrara-en-el-6-499467",
+      "valor": 2.5
+     }
+    ],
+    "serie": [
+     {
+      "p": "2022-T1",
+      "v": 7.8
+     },
+     {
+      "p": "2022-T2",
+      "v": 12.2
+     },
+     {
+      "p": "2022-T3",
+      "v": 7.4
+     },
+     {
+      "p": "2022-T4",
+      "v": 2.1
+     },
+     {
+      "p": "2023-T1",
+      "v": 2.4
+     },
+     {
+      "p": "2023-T2",
+      "v": 0.5
+     },
+     {
+      "p": "2023-T3",
+      "v": -0.6
+     },
+     {
+      "p": "2023-T4",
+      "v": 0.6
+     },
+     {
+      "p": "2024-T1",
+      "v": 0.7
+     },
+     {
+      "p": "2024-T2",
+      "v": 2
+     },
+     {
+      "p": "2024-T3",
+      "v": 2
+     },
+     {
+      "p": "2024-T4",
+      "v": 2.4
+     },
+     {
+      "p": "2025-T1",
+      "v": 2.7
+     },
+     {
+      "p": "2025-T2",
+      "v": 2.1
+     },
+     {
+      "p": "2025-T3",
+      "v": 3.6
+     },
+     {
+      "p": "2025-T4",
+      "v": 2.1
+     },
+     {
+      "p": "2026-T1",
+      "v": 2.2
+     },
+     {
+      "p": "2026-T2",
+      "v": 3.5
+     }
+    ],
+    "serieNombre": "PIB, variación anual, serie original (volumen, base 2015)",
+    "tipoManual": "auto",
+    "transformacion": "raw",
+    "umbral": null,
+    "url": "https://www.dane.gov.co/index.php/estadisticas-por-tema/cuentas-nacionales/cuentas-nacionales-trimestrales",
+    "verificacion": "por_verificar",
+    "reciente": {
+     "fecha": "2026-10-20",
+     "valor": -0.04,
+     "corto": "ISE ago-2026 −0,04 % anual",
+     "alerta": true,
+     "url": "https://www.larepublica.co/economia/impacto-del-terremoto-llevo-al-ise-a-su-primera-contraccion-desde-abril-del-ano-pasado-4506438",
+     "texto": "el indicador de actividad (ISE) de agosto de 2026 cayó 0,04 % anual, su primera contracción desde abril de 2025, por el impacto del terremoto del 10 de agosto; los analistas esperaban +1,5 %. Acumulado enero–agosto: 2,27 %. Anticipa un tercer trimestre más débil."
+    }
+   },
+   {
+    "id": "v02",
+    "calificacion": "2",
+    "canal": "inflacion",
+    "codigo": "V-02",
+    "corte": "sep. 2026",
+    "efectoSubida": "auto",
+    "exposicionManual": "auto",
+    "fechaConsulta": "2026-10-26",
+    "frecuencia": "Mensual (cierre de trimestre)",
+    "fuente": "DANE",
+    "lectura": "Confirmados: sep. 2024 5,81 %; dic. 2024 5,20 %; sep. 2025 5,18 %; dic. 2025 5,10 %; mar. 2026 5,56 %; jun. 2026 6,14 %; sep. 2026 6,29 %. Los trimestres anteriores se cargaron como punto de partida y deben contrastarse con la serie oficial descargada antes de cambiar el estado a 'Fuente oficial verificada'.",
+    "nombre": "Inflación anual (IPC)",
+    "proy": [
+     {
+      "fecha": "jul-2026",
+      "horizonte": "Cierre 2026",
+      "nota": "Informe de Política Monetaria de julio",
+      "org": "Banco de la República (equipo técnico)",
+      "tipo": "cierre",
+      "url": "https://www.portafolio.co/economia/crecimiento/banco-de-la-republica-estima-que-en-el-2026-la-inflacion-cerrara-en-el-6-499467",
+      "valor": 6.9
+     },
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Cierre 2026",
+      "nota": "Mediana de la encuesta de octubre",
+      "org": "Analistas · Encuesta BanRep",
+      "tipo": "cierre",
+      "url": "https://www.larepublica.co/economia/analistas-preven-un-alza-de-25-puntos-basicos-en-la-tasa-de-politica-monetaria-4504617",
+      "valor": 6.85
+     },
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Promedio 2026",
+      "nota": "Inflación promedio del año, no de cierre",
+      "org": "FMI · WEO",
+      "tipo": "promedio",
+      "url": "https://www.infobae.com/colombia/2026/10/14/el-fmi-preve-que-la-economia-colombiana-crezca-22-en-2026-y-se-desacelere-frente-a-2025-planteo-una-dificil-realidad-para-2027/",
+      "valor": 6
+     },
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Promedio 2027",
+      "nota": "Inflación promedio del año, no de cierre",
+      "org": "FMI · WEO",
+      "tipo": "promedio",
+      "url": "https://www.infobae.com/colombia/2026/10/14/el-fmi-preve-que-la-economia-colombiana-crezca-22-en-2026-y-se-desacelere-frente-a-2025-planteo-una-dificil-realidad-para-2027/",
+      "valor": 5.7
+     }
+    ],
+    "serie": [
+     {
+      "p": "2022-T1",
+      "v": 8.53
+     },
+     {
+      "p": "2022-T2",
+      "v": 9.67
+     },
+     {
+      "p": "2022-T3",
+      "v": 11.44
+     },
+     {
+      "p": "2022-T4",
+      "v": 13.12
+     },
+     {
+      "p": "2023-T1",
+      "v": 13.34
+     },
+     {
+      "p": "2023-T2",
+      "v": 12.13
+     },
+     {
+      "p": "2023-T3",
+      "v": 10.99
+     },
+     {
+      "p": "2023-T4",
+      "v": 9.28
+     },
+     {
+      "p": "2024-T1",
+      "v": 7.36
+     },
+     {
+      "p": "2024-T2",
+      "v": 7.18
+     },
+     {
+      "p": "2024-T3",
+      "v": 5.81
+     },
+     {
+      "p": "2024-T4",
+      "v": 5.2
+     },
+     {
+      "p": "2025-T1",
+      "v": 5.09
+     },
+     {
+      "p": "2025-T2",
+      "v": 4.82
+     },
+     {
+      "p": "2025-T3",
+      "v": 5.18
+     },
+     {
+      "p": "2025-T4",
+      "v": 5.1
+     },
+     {
+      "p": "2026-T1",
+      "v": 5.56
+     },
+     {
+      "p": "2026-T2",
+      "v": 6.14
+     },
+     {
+      "p": "2026-T3",
+      "v": 6.29
+     }
+    ],
+    "serieNombre": "IPC, variación anual al cierre de trimestre (mar, jun, sep, dic)",
+    "tipoManual": "auto",
+    "transformacion": "raw",
+    "umbral": null,
+    "url": "https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-precios-al-consumidor-ipc",
+    "verificacion": "por_verificar",
+    "reciente": {
+     "fecha": "2026-10-07",
+     "valor": 6.29,
+     "corto": "sep-2026 6,29 % (próximo dato en noviembre)",
+     "alerta": false,
+     "url": "https://www.portafolio.co/economia/finanzas/inflacion-en-colombia-sigue-subiendo-se-ubico-en-6-29-en-septiembre-de-504077",
+     "texto": "septiembre de 2026, 6,29 % anual, el nivel más alto desde julio de 2024. El dato de octubre se publica en noviembre."
+    }
+   },
+   {
+    "id": "v03",
+    "calificacion": "2",
+    "canal": "tasa",
+    "codigo": "V-03",
+    "corte": "sep. 2026 (decisión del 30-sep, vigente desde el 1-oct)",
+    "efectoSubida": "auto",
+    "exposicionManual": "auto",
+    "fechaConsulta": "2026-10-26",
+    "frecuencia": "Mensual (cierre de trimestre)",
+    "fuente": "Banco de la República",
+    "lectura": "Confirmados: 9,50 % → 9,25 % (abr. 2025) y 9,25 % al cierre de 2025; alza de 200 pb entre enero y marzo de 2026 (11,25 %); 12,00 % en junio de 2026; 12,25 % el 30 de septiembre de 2026. Los trimestres anteriores se cargaron como punto de partida y deben contrastarse con la serie oficial descargada antes de cambiar el estado a 'Fuente oficial verificada'.",
+    "nombre": "Tasa de intervención BanRep",
+    "proy": [
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Cierre 2026",
+      "nota": "Mediana de la encuesta de octubre",
+      "org": "Analistas · Encuesta BanRep",
+      "tipo": "cierre",
+      "url": "https://www.larepublica.co/economia/analistas-preven-un-alza-de-25-puntos-basicos-en-la-tasa-de-politica-monetaria-4504617",
+      "valor": 12.5
+     },
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Cierre 2027",
+      "nota": "Recortes desde mediados de 2027",
+      "org": "Analistas · Encuesta BanRep",
+      "tipo": "cierre",
+      "url": "https://www.larepublica.co/economia/analistas-preven-un-alza-de-25-puntos-basicos-en-la-tasa-de-politica-monetaria-4504617",
+      "valor": 11
+     }
+    ],
+    "serie": [
+     {
+      "p": "2022-T1",
+      "v": 5
+     },
+     {
+      "p": "2022-T2",
+      "v": 7.5
+     },
+     {
+      "p": "2022-T3",
+      "v": 10
+     },
+     {
+      "p": "2022-T4",
+      "v": 12
+     },
+     {
+      "p": "2023-T1",
+      "v": 13
+     },
+     {
+      "p": "2023-T2",
+      "v": 13.25
+     },
+     {
+      "p": "2023-T3",
+      "v": 13.25
+     },
+     {
+      "p": "2023-T4",
+      "v": 13
+     },
+     {
+      "p": "2024-T1",
+      "v": 12.25
+     },
+     {
+      "p": "2024-T2",
+      "v": 11.25
+     },
+     {
+      "p": "2024-T3",
+      "v": 10.25
+     },
+     {
+      "p": "2024-T4",
+      "v": 9.5
+     },
+     {
+      "p": "2025-T1",
+      "v": 9.5
+     },
+     {
+      "p": "2025-T2",
+      "v": 9.25
+     },
+     {
+      "p": "2025-T3",
+      "v": 9.25
+     },
+     {
+      "p": "2025-T4",
+      "v": 9.25
+     },
+     {
+      "p": "2026-T1",
+      "v": 11.25
+     },
+     {
+      "p": "2026-T2",
+      "v": 12
+     },
+     {
+      "p": "2026-T3",
+      "v": 12.25
+     }
+    ],
+    "serieNombre": "Tasa de política monetaria, nivel al cierre de trimestre",
+    "tipoManual": "auto",
+    "transformacion": "diff",
+    "umbral": null,
+    "url": "https://www.banrep.gov.co/es/estadisticas/tasas-interes-politica-monetaria",
+    "verificacion": "por_verificar",
+    "reciente": {
+     "fecha": "2026-10-01",
+     "valor": 12.25,
+     "corto": "vigente 12,25 %; analistas esperan 12,50 %",
+     "alerta": false,
+     "url": "https://www.larepublica.co/economia/analistas-preven-un-alza-de-25-puntos-basicos-en-la-tasa-de-politica-monetaria-4504617",
+     "texto": "tasa vigente de 12,25 % desde el 1 de octubre de 2026. La encuesta de analistas de octubre espera un alza a 12,50 % antes de cerrar el año y recortes desde mediados de 2027."
+    }
+   },
+   {
+    "id": "v04",
+    "calificacion": "2",
+    "canal": "trm",
+    "codigo": "V-04",
+    "corte": "30-sep-2026",
+    "efectoSubida": "auto",
+    "exposicionManual": "auto",
+    "fechaConsulta": "2026-10-26",
+    "frecuencia": "Mensual (cierre de trimestre)",
+    "fuente": "Banco de la República",
+    "lectura": "Confirmados: cierre de 2025 ≈ 3.757; 31-mar-2026 3.669,96; 30-jun-2026 3.443,59; 30-sep-2026 3.341,23. Los trimestres anteriores se cargaron como punto de partida y deben contrastarse con la serie oficial descargada antes de cambiar el estado a 'Fuente oficial verificada'.",
+    "nombre": "Tasa de cambio (TRM)",
+    "proy": [
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Cierre 2026",
+      "nota": "Mediana de la encuesta de octubre",
+      "org": "Analistas · Encuesta BanRep",
+      "tipo": "cierre",
+      "url": "https://www.larepublica.co/economia/analistas-preven-un-alza-de-25-puntos-basicos-en-la-tasa-de-politica-monetaria-4504617",
+      "valor": 3257
+     }
+    ],
+    "serie": [
+     {
+      "p": "2022-T1",
+      "v": 3756.03
+     },
+     {
+      "p": "2022-T2",
+      "v": 4127.47
+     },
+     {
+      "p": "2022-T3",
+      "v": 4532.07
+     },
+     {
+      "p": "2022-T4",
+      "v": 4810.2
+     },
+     {
+      "p": "2023-T1",
+      "v": 4646.08
+     },
+     {
+      "p": "2023-T2",
+      "v": 4191.28
+     },
+     {
+      "p": "2023-T3",
+      "v": 4053.76
+     },
+     {
+      "p": "2023-T4",
+      "v": 3822.05
+     },
+     {
+      "p": "2024-T1",
+      "v": 3842.3
+     },
+     {
+      "p": "2024-T2",
+      "v": 4148.04
+     },
+     {
+      "p": "2024-T3",
+      "v": 4164.21
+     },
+     {
+      "p": "2024-T4",
+      "v": 4409.15
+     },
+     {
+      "p": "2025-T1",
+      "v": 4192.57
+     },
+     {
+      "p": "2025-T2",
+      "v": 4069.67
+     },
+     {
+      "p": "2025-T3",
+      "v": 3901.29
+     },
+     {
+      "p": "2025-T4",
+      "v": 3757.08
+     },
+     {
+      "p": "2026-T1",
+      "v": 3669.96
+     },
+     {
+      "p": "2026-T2",
+      "v": 3443.59
+     },
+     {
+      "p": "2026-T3",
+      "v": 3341.23
+     }
+    ],
+    "serieNombre": "TRM del último día hábil del trimestre (COP por USD)",
+    "tipoManual": "auto",
+    "transformacion": "pct",
+    "umbral": null,
+    "url": "https://www.banrep.gov.co/es/estadisticas/trm",
+    "verificacion": "por_verificar",
+    "reciente": {
+     "fecha": "2026-10-21",
+     "valor": 3163.76,
+     "corto": "21-oct-2026 3.163,76 (−5,3 % en octubre)",
+     "alerta": true,
+     "url": "https://www.portafolio.co/economia/finanzas/precio-del-dolar-hoy-en-colombia-la-divisa-inicia-cerca-de-3-160-este-21-de-octubre-504832",
+     "texto": "TRM de 3.163,76 el 21 de octubre de 2026, 5,3 % por debajo del cierre de septiembre; el dólar acumula una caída de 15,6 % en el año y ya está por debajo de la proyección de cierre de los analistas (3.257)."
+    }
+   },
+   {
+    "id": "v05",
+    "calificacion": "3",
+    "canal": "desempleo",
+    "codigo": "V-05",
+    "corte": "jun. 2026 (sep. 2026 aún no publicado)",
+    "efectoSubida": "auto",
+    "exposicionManual": "auto",
+    "fechaConsulta": "2026-10-26",
+    "frecuencia": "Mensual (cierre de trimestre)",
+    "fuente": "DANE",
+    "lectura": "Confirmados: mar. 2025 9,6 %; mar. 2026 8,8 %; jun. 2026 8,0 %. Dato más reciente: ago. 2026 9,4 % (frente a 8,6 % en ago. 2025), señal de deterioro que aún no entra a la serie trimestral. Los trimestres anteriores se cargaron como punto de partida y deben contrastarse con la serie oficial descargada antes de cambiar el estado a 'Fuente oficial verificada'.",
+    "nombre": "Tasa de desempleo",
+    "proy": [
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Promedio 2026",
+      "nota": "Promedio anual",
+      "org": "FMI · WEO",
+      "tipo": "promedio",
+      "url": "https://www.infobae.com/colombia/2026/10/14/el-fmi-preve-que-la-economia-colombiana-crezca-22-en-2026-y-se-desacelere-frente-a-2025-planteo-una-dificil-realidad-para-2027/",
+      "valor": 9
+     },
+     {
+      "fecha": "oct-2026",
+      "horizonte": "Promedio 2027",
+      "nota": "Promedio anual",
+      "org": "FMI · WEO",
+      "tipo": "promedio",
+      "url": "https://www.infobae.com/colombia/2026/10/14/el-fmi-preve-que-la-economia-colombiana-crezca-22-en-2026-y-se-desacelere-frente-a-2025-planteo-una-dificil-realidad-para-2027/",
+      "valor": 10
+     }
+    ],
+    "serie": [
+     {
+      "p": "2022-T1",
+      "v": 12.1
+     },
+     {
+      "p": "2022-T2",
+      "v": 11.3
+     },
+     {
+      "p": "2022-T3",
+      "v": 10.7
+     },
+     {
+      "p": "2022-T4",
+      "v": 10.3
+     },
+     {
+      "p": "2023-T1",
+      "v": 10
+     },
+     {
+      "p": "2023-T2",
+      "v": 9.3
+     },
+     {
+      "p": "2023-T3",
+      "v": 9.3
+     },
+     {
+      "p": "2023-T4",
+      "v": 10
+     },
+     {
+      "p": "2024-T1",
+      "v": 11.3
+     },
+     {
+      "p": "2024-T2",
+      "v": 10.3
+     },
+     {
+      "p": "2024-T3",
+      "v": 9.7
+     },
+     {
+      "p": "2024-T4",
+      "v": 9.1
+     },
+     {
+      "p": "2025-T1",
+      "v": 9.6
+     },
+     {
+      "p": "2025-T2",
+      "v": 8.6
+     },
+     {
+      "p": "2025-T3",
+      "v": 8.2
+     },
+     {
+      "p": "2025-T4",
+      "v": 8
+     },
+     {
+      "p": "2026-T1",
+      "v": 8.8
+     },
+     {
+      "p": "2026-T2",
+      "v": 8
+     }
+    ],
+    "serieNombre": "GEIH, tasa de desempleo nacional, mes de cierre de trimestre",
+    "tipoManual": "auto",
+    "transformacion": "diff",
+    "umbral": null,
+    "url": "https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral/empleo-y-desempleo",
+    "verificacion": "por_verificar",
+    "reciente": {
+     "fecha": "2026-09-30",
+     "valor": 9.4,
+     "corto": "ago-2026 9,4 % (+0,8 pp en un año)",
+     "alerta": true,
+     "url": "https://cambiocolombia.com/economia/articulo/2026/9/desempleo-en-colombia-subio-a-94-por-ciento-en-agosto-de-2026",
+     "texto": "agosto de 2026, 9,4 %, frente a 8,6 % en agosto de 2025: el desempleo dejó de bajar. El dato de septiembre se publica a fin de octubre."
+    }
+   },
+   {
+    "id": "v06",
+    "calificacion": "3",
+    "canal": "confianza",
+    "codigo": "V-06",
+    "corte": "",
+    "efectoSubida": "auto",
+    "exposicionManual": "auto",
+    "fechaConsulta": "2026-10-26",
+    "frecuencia": "Mensual (cierre de trimestre)",
+    "fuente": "Fedesarrollo",
+    "lectura": "Pendiente: el equipo de Macroeconomía debe descargar la serie de Fedesarrollo y pegarla aquí.",
+    "nombre": "Confianza del consumidor",
+    "proy": [],
+    "serie": [],
+    "serieNombre": "Índice de Confianza del Consumidor (ICC), balance",
+    "tipoManual": "auto",
+    "transformacion": "diff",
+    "umbral": null,
+    "url": "https://www.fedesarrollo.org.co/encuestas/consumidor-eoc",
+    "verificacion": "por_verificar",
+    "reciente": {
+     "fecha": "2026-10-15",
+     "valor": 15.7,
+     "corto": "sep-2026 15,7 % (promedio T3: 17,3 %)",
+     "alerta": false,
+     "url": "https://www.larepublica.co/economia/indice-de-confianza-al-consumidor-en-septiembre-de-2026-entregado-por-fedesarrollo-4502556",
+     "texto": "balance de 15,7 % en septiembre de 2026 (agosto 15,5 %; promedio del tercer trimestre 17,3 %; septiembre de 2025 1,6 %). Falta cargar la serie trimestral completa para calcular su semáforo."
+    }
+   }
+  ],
+  "pestel": [
+   {
+    "id": "p01",
+    "codigo": "P-01",
+    "dimension": "E",
+    "factor": "Precio internacional del café arábigo en niveles altos encarece la materia prima",
+    "fuente": "ICE / Federación Nacional de Cafeteros [POR VERIFICAR]",
+    "impacto": 5,
+    "tipo": "A"
+   },
+   {
+    "id": "p02",
+    "codigo": "P-02",
+    "dimension": "S",
+    "factor": "Crecimiento del consumo de cafés especiales y de origen en el país",
+    "fuente": "Informes sectoriales [POR VERIFICAR]",
+    "impacto": 4,
+    "tipo": "O"
+   },
+   {
+    "id": "p03",
+    "codigo": "P-03",
+    "dimension": "T",
+    "factor": "Expansión del comercio electrónico y domicilios por plataforma",
+    "fuente": "MinTIC / informes sectoriales",
+    "impacto": 3,
+    "tipo": "O"
+   },
+   {
+    "id": "p04",
+    "codigo": "P-04",
+    "dimension": "A",
+    "factor": "Exigencias de trazabilidad y deforestación cero para exportar a la Unión Europea",
+    "fuente": "Reglamento UE 2023/1115 [POR VERIFICAR]",
+    "impacto": 4,
+    "tipo": "A"
+   },
+   {
+    "id": "p05",
+    "codigo": "P-05",
+    "dimension": "L",
+    "factor": "Cambios laborales que elevan costos de operación de tiendas",
+    "fuente": "Ley de reforma laboral [POR VERIFICAR]",
+    "impacto": 3,
+    "tipo": "A"
+   }
+  ],
+  "internos": [
+   {
+    "id": "f01",
+    "calificacion": "4",
+    "codigo": "F-01",
+    "eslabon": "mkt",
+    "evidencia": "ILUSTRATIVO · sustentar con informe de gestión o sostenibilidad 2025",
+    "factor": "Marca reconocida asociada al origen del café colombiano",
+    "peso": 0.18,
+    "tipo": "F"
+   },
+   {
+    "id": "f02",
+    "calificacion": "4",
+    "codigo": "F-02",
+    "eslabon": "oper",
+    "evidencia": "ILUSTRATIVO · sustentar con informe de gestión o sostenibilidad 2025",
+    "factor": "Red propia de tiendas en Colombia",
+    "peso": 0.15,
+    "tipo": "F"
+   },
+   {
+    "id": "f03",
+    "calificacion": "3",
+    "codigo": "F-03",
+    "eslabon": "abast",
+    "evidencia": "ILUSTRATIVO · sustentar con informe de gestión o sostenibilidad 2025",
+    "factor": "Abastecimiento ligado a productores colombianos",
+    "peso": 0.12,
+    "tipo": "F"
+   },
+   {
+    "id": "f04",
+    "calificacion": "3",
+    "codigo": "F-04",
+    "eslabon": "tec",
+    "evidencia": "ILUSTRATIVO · sustentar con informe de gestión o sostenibilidad 2025",
+    "factor": "Canal digital y comercio electrónico en desarrollo",
+    "peso": 0.1,
+    "tipo": "F"
+   },
+   {
+    "id": "f05",
+    "calificacion": "1",
+    "codigo": "F-05",
+    "eslabon": "log_in",
+    "evidencia": "ILUSTRATIVO · sustentar con informe de gestión o sostenibilidad 2025",
+    "factor": "Exposición de costos al precio del café y a la TRM",
+    "peso": 0.17,
+    "tipo": "D"
+   },
+   {
+    "id": "f06",
+    "calificacion": "2",
+    "codigo": "F-06",
+    "eslabon": "log_out",
+    "evidencia": "ILUSTRATIVO · sustentar con informe de gestión o sostenibilidad 2025",
+    "factor": "Operación internacional con rentabilidad desigual por país",
+    "peso": 0.14,
+    "tipo": "D"
+   },
+   {
+    "id": "f07",
+    "calificacion": "2",
+    "codigo": "F-07",
+    "eslabon": "infra",
+    "evidencia": "ILUSTRATIVO · sustentar con informe de gestión o sostenibilidad 2025",
+    "factor": "Estructura de costos fijos alta en tiendas",
+    "peso": 0.14,
+    "tipo": "D"
+   }
+  ],
+  "unidades": [
+   {
+    "id": "u01",
+    "codigo": "U-01",
+    "crecimiento": 6,
+    "fuente": "ILUSTRATIVO · reemplazar con datos sectoriales",
+    "nombre": "Tiendas Colombia",
+    "participacion": 1.6,
+    "ventas": 60,
+    "verificacion": "ilustrativo"
+   },
+   {
+    "id": "u02",
+    "codigo": "U-02",
+    "crecimiento": 14,
+    "fuente": "ILUSTRATIVO · reemplazar con datos sectoriales",
+    "nombre": "Tiendas internacionales",
+    "participacion": 0.4,
+    "ventas": 18,
+    "verificacion": "ilustrativo"
+   },
+   {
+    "id": "u03",
+    "codigo": "U-03",
+    "crecimiento": 4,
+    "fuente": "ILUSTRATIVO · reemplazar con datos sectoriales",
+    "nombre": "Café empacado y grandes superficies",
+    "participacion": 1.2,
+    "ventas": 15,
+    "verificacion": "ilustrativo"
+   },
+   {
+    "id": "u04",
+    "codigo": "U-04",
+    "crecimiento": 22,
+    "fuente": "ILUSTRATIVO · reemplazar con datos sectoriales",
+    "nombre": "Comercio electrónico",
+    "participacion": 0.6,
+    "ventas": 7,
+    "verificacion": "ilustrativo"
+   }
+  ],
+  "estrategias": [
+   {
+    "id": "e01",
+    "codigo": "E-01",
+    "estrategia": "Coberturas y contratos de compra a plazo",
+    "externos": [
+     "p01"
+    ],
+    "factores": [
+     "f05"
+    ],
+    "fin": "2027-06-30",
+    "inicio": "2026-07-01",
+    "objetivo": "Proteger el margen bruto frente a la volatilidad del café y la TRM",
+    "presupuesto": 420000000,
+    "responsable": "Gerencia financiera",
+    "tacticas": "- Política de cobertura para el 50 % de las compras proyectadas\n- Contratos de abastecimiento a plazo con productores\n- Revisión trimestral de precios por canal",
+    "tipo": "Defensiva",
+    "variables": [
+     "v02",
+     "v04"
+    ]
+   },
+   {
+    "id": "e02",
+    "codigo": "E-02",
+    "estrategia": "Desarrollo de mercado por canal digital propio y plataformas",
+    "externos": [
+     "p03"
+    ],
+    "factores": [
+     "f04",
+     "f01"
+    ],
+    "fin": "2027-12-31",
+    "inicio": "2026-07-01",
+    "objetivo": "Crecer en ventas digitales",
+    "presupuesto": 650000000,
+    "responsable": "Gerencia comercial",
+    "tacticas": "- Programa de lealtad integrado al canal digital\n- Suscripción mensual de café\n- Alianzas con plataformas de domicilio",
+    "tipo": "Intensiva",
+    "variables": [
+     "v01",
+     "v06"
+    ]
+   },
+   {
+    "id": "e03",
+    "codigo": "E-03",
+    "estrategia": "Penetración de mercado con portafolio de precio accesible",
+    "externos": [
+     "p02"
+    ],
+    "factores": [
+     "f02",
+     "f07"
+    ],
+    "fin": "2027-06-30",
+    "inicio": "2026-08-01",
+    "objetivo": "Recuperar tráfico en tiendas ante menor ingreso disponible",
+    "presupuesto": 380000000,
+    "responsable": "Gerencia de tiendas",
+    "tacticas": "- Línea de bebidas de entrada\n- Horarios y formatos express en zonas de oficina",
+    "tipo": "Intensiva",
+    "variables": [
+     "v02",
+     "v05"
+    ]
+   },
+   {
+    "id": "e04",
+    "codigo": "E-04",
+    "estrategia": "Integración hacia atrás con trazabilidad de origen",
+    "externos": [
+     "p04"
+    ],
+    "factores": [
+     "f03"
+    ],
+    "fin": "2027-12-31",
+    "inicio": "2026-07-01",
+    "objetivo": "Cumplir requisitos de trazabilidad para exportación",
+    "presupuesto": 290000000,
+    "responsable": "Dirección de sostenibilidad",
+    "tacticas": "- Georreferenciación de fincas proveedoras\n- Certificación de cadena de custodia",
+    "tipo": "Integración",
+    "variables": []
+   }
+  ],
+  "kpis": [
+   {
+    "id": "k01",
+    "actual": 46,
+    "codigo": "K-01",
+    "denominador": "Ingresos operacionales",
+    "estrategia": "e01",
+    "frecuencia": "Trimestral",
+    "fuente": "ILUSTRATIVO",
+    "lineaBase": 44,
+    "meta": 46,
+    "nombre": "Margen bruto",
+    "numerador": "Utilidad bruta",
+    "unidad": "%"
+   },
+   {
+    "id": "k02",
+    "actual": 8.9,
+    "codigo": "K-02",
+    "denominador": "Ventas totales",
+    "estrategia": "e02",
+    "frecuencia": "Mensual",
+    "fuente": "ILUSTRATIVO",
+    "lineaBase": 6,
+    "meta": 10,
+    "nombre": "Participación de ventas digitales",
+    "numerador": "Ventas canal digital",
+    "unidad": "%"
+   },
+   {
+    "id": "k03",
+    "actual": 425,
+    "codigo": "K-03",
+    "denominador": "Tiendas abiertas",
+    "estrategia": "e03",
+    "frecuencia": "Mensual",
+    "fuente": "ILUSTRATIVO",
+    "lineaBase": 410,
+    "meta": 450,
+    "nombre": "Tráfico promedio por tienda",
+    "numerador": "Transacciones del periodo",
+    "unidad": "transacciones/día"
+   },
+   {
+    "id": "k04",
+    "actual": 85,
+    "codigo": "K-04",
+    "denominador": "Fincas proveedoras",
+    "estrategia": "e04",
+    "frecuencia": "Semestral",
+    "fuente": "ILUSTRATIVO",
+    "lineaBase": 35,
+    "meta": 90,
+    "nombre": "Fincas proveedoras con trazabilidad",
+    "numerador": "Fincas georreferenciadas",
+    "unidad": "%"
+   },
+   {
+    "id": "k05",
+    "actual": 19.7,
+    "codigo": "K-05",
+    "denominador": "Transacciones",
+    "estrategia": "e03",
+    "frecuencia": "Mensual",
+    "fuente": "ILUSTRATIVO",
+    "lineaBase": 18.5,
+    "meta": 20,
+    "nombre": "Ticket promedio",
+    "numerador": "Ventas en tiendas",
+    "unidad": "COP miles"
+   }
+  ],
+  "tareas": [
+   {
+    "id": "t01",
+    "codigo": "T-01",
+    "estrategia": "e01",
+    "fin": "2026-07-31",
+    "inicio": "2026-07-01",
+    "recursos": "Analista de tesorería; asesoría de banca de inversión",
+    "responsable": "Gerencia financiera",
+    "tactica": "Política de cobertura para el 50 % de las compras proyectadas",
+    "tarea": "Definir con el área financiera el porcentaje de cobertura y los instrumentos permitidos"
+   },
+   {
+    "id": "t02",
+    "codigo": "T-02",
+    "estrategia": "e01",
+    "fin": "2026-08-31",
+    "inicio": "2026-08-01",
+    "recursos": "Sesión de junta; documento de política",
+    "responsable": "Gerencia general",
+    "tactica": "Política de cobertura para el 50 % de las compras proyectadas",
+    "tarea": "Aprobar la política de cobertura en junta directiva"
+   },
+   {
+    "id": "t03",
+    "codigo": "T-03",
+    "estrategia": "e01",
+    "fin": "2026-11-30",
+    "inicio": "2026-09-01",
+    "recursos": "Equipo de compras; asesoría jurídica",
+    "responsable": "Dirección de abastecimiento",
+    "tactica": "Contratos de abastecimiento a plazo con productores",
+    "tarea": "Negociar contratos de compra a plazo con cooperativas proveedoras"
+   },
+   {
+    "id": "t04",
+    "codigo": "T-04",
+    "estrategia": "e01",
+    "fin": "2026-09-30",
+    "inicio": "2026-08-15",
+    "recursos": "Analista de datos; herramienta de BI",
+    "responsable": "Gerencia comercial",
+    "tactica": "Revisión trimestral de precios por canal",
+    "tarea": "Diseñar el tablero trimestral de precios por canal"
+   },
+   {
+    "id": "t05",
+    "codigo": "T-05",
+    "estrategia": "e02",
+    "fin": "2026-10-31",
+    "inicio": "2026-07-15",
+    "recursos": "Equipo de desarrollo; proveedor de plataforma de lealtad",
+    "responsable": "Gerencia digital",
+    "tactica": "Programa de lealtad integrado al canal digital",
+    "tarea": "Integrar el programa de lealtad a la app y al sitio web"
+   },
+   {
+    "id": "t06",
+    "codigo": "T-06",
+    "estrategia": "e02",
+    "fin": "2027-01-31",
+    "inicio": "2026-11-01",
+    "recursos": "Inventario dedicado; operador logístico de última milla",
+    "responsable": "Gerencia de producto",
+    "tactica": "Suscripción mensual de café",
+    "tarea": "Lanzar piloto de suscripción mensual en Bogotá"
+   },
+   {
+    "id": "t07",
+    "codigo": "T-07",
+    "estrategia": "e02",
+    "fin": "2026-10-15",
+    "inicio": "2026-08-01",
+    "recursos": "Equipo comercial; presupuesto de comisiones",
+    "responsable": "Gerencia comercial",
+    "tactica": "Alianzas con plataformas de domicilio",
+    "tarea": "Firmar alianzas con dos plataformas de domicilio"
+   },
+   {
+    "id": "t08",
+    "codigo": "T-08",
+    "estrategia": "e03",
+    "fin": "2026-10-31",
+    "inicio": "2026-08-01",
+    "recursos": "Laboratorio de bebidas; panel de consumidores",
+    "responsable": "Gerencia de producto",
+    "tactica": "Línea de bebidas de entrada",
+    "tarea": "Desarrollar y probar la línea de bebidas de entrada"
+   },
+   {
+    "id": "t09",
+    "codigo": "T-09",
+    "estrategia": "e03",
+    "fin": "2027-03-31",
+    "inicio": "2026-11-01",
+    "recursos": "Locales en arriendo; personal de tienda",
+    "responsable": "Gerencia de tiendas",
+    "tactica": "Horarios y formatos express en zonas de oficina",
+    "tarea": "Abrir dos formatos express en zonas de oficina"
+   },
+   {
+    "id": "t10",
+    "codigo": "T-10",
+    "estrategia": "e04",
+    "fin": "2027-03-31",
+    "inicio": "2026-07-01",
+    "recursos": "Técnicos de campo; software de georreferenciación",
+    "responsable": "Dirección de sostenibilidad",
+    "tactica": "Georreferenciación de fincas proveedoras",
+    "tarea": "Georreferenciar las fincas proveedoras priorizadas"
+   },
+   {
+    "id": "t11",
+    "codigo": "T-11",
+    "estrategia": "e04",
+    "fin": "2027-09-30",
+    "inicio": "2027-04-01",
+    "recursos": "Ente certificador; equipo de calidad",
+    "responsable": "Dirección de calidad",
+    "tactica": "Certificación de cadena de custodia",
+    "tarea": "Preparar la auditoría de certificación de cadena de custodia"
+   }
+  ]
+ }
+}

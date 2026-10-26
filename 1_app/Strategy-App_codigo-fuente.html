@@ -1,0 +1,1411 @@
+<title>Strategy App</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: tablero de planeación — barra superior fija con selector de empresa, pestañas por módulo/asignatura, contenido en rejilla de tarjetas sobre papel milimetrado tenue */
+:root{
+  --paper:#EEF2F3; --surface:#FFFFFF; --sunk:#F5F8F8; --ink:#13232A; --muted:#566A72; --line:#D3DDE0;
+  --accent:#2350C8; --accent-soft:#E3EAFB; --gold:#9A6A12;
+  --ok:#2C7A4B; --ok-soft:#E1F2E7; --warn:#A86A00; --warn-soft:#FBEFD6; --bad:#B8402B; --bad-soft:#F8E3DE;
+  --grid:rgba(35,80,200,.06);
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1518; --surface:#152025; --sunk:#111A1E; --ink:#E2EBED; --muted:#93A6AD; --line:#283840;
+  --accent:#86A6FF; --accent-soft:#1D2A4D; --gold:#D9A845;
+  --ok:#6CC58F; --ok-soft:#173327; --warn:#E3AE4A; --warn-soft:#3A2C10; --bad:#F08A73; --bad-soft:#3D1F19;
+  --grid:rgba(134,166,255,.05); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1518; --surface:#152025; --sunk:#111A1E; --ink:#E2EBED; --muted:#93A6AD; --line:#283840;
+  --accent:#86A6FF; --accent-soft:#1D2A4D; --gold:#D9A845;
+  --ok:#6CC58F; --ok-soft:#173327; --warn:#E3AE4A; --warn-soft:#3A2C10; --bad:#F08A73; --bad-soft:#3D1F19;
+  --grid:rgba(134,166,255,.05); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.topin{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding-block:10px}
+.brand{display:flex;flex-direction:column;line-height:1.1;margin-right:auto}
+.brand b{font-family:var(--f-display);font-size:20px;font-weight:700;letter-spacing:-.01em}
+.brand span{font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+select,input,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 9px;max-width:100%}
+textarea{width:100%;min-height:80px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;font-weight:600}
+button:hover{border-color:var(--accent)}
+button.pri{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.ghost{border-color:transparent;background:transparent;color:var(--accent);padding:4px 6px}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button:disabled{opacity:.5;cursor:not-allowed}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;padding-bottom:0}
+nav.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;padding:9px 12px 8px;white-space:nowrap;color:var(--muted);display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+nav.tabs button small{font-weight:500;font-size:11px;letter-spacing:.03em}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding-block:18px 60px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:26px;font-weight:700}
+h2{font-size:18px;font-weight:700}
+h3{font-size:15px;font-weight:700}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.cardhead{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
+.cardhead p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.tile .v{font-family:var(--f-display);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.tile .l{font-size:12px;color:var(--muted)}
+.tile .s{font-size:12px}
+.muted{color:var(--muted)}
+.mono,.code{font-family:var(--f-mono);font-size:12.5px}
+.code{font-weight:500;color:var(--accent)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--sunk);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;white-space:nowrap}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--sunk)}
+tfoot td{font-weight:700;background:var(--sunk)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap;border:1px solid transparent}
+.p-ok{background:var(--ok-soft);color:var(--ok)}
+.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.p-acc{background:var(--accent-soft);color:var(--accent)}
+.p-line{border-color:var(--line);color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.plan td{font-size:12.5px}
+.plan td.grp{background:var(--sunk);font-weight:600;min-width:180px}
+.plan td.tac{min-width:180px}
+.plan td.task{min-width:220px}
+.plan tr.newtask td{color:var(--muted)}
+.insight{border-color:var(--accent);background:linear-gradient(0deg,var(--surface),var(--surface)),var(--surface)}
+.insight{box-shadow:inset 4px 0 0 var(--accent)}
+ul.ins{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+ul.ins li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.45}
+ul.ins .tag{flex:none;min-width:84px;text-align:center;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-top:1px}
+.i-bad .tag{background:var(--bad-soft);color:var(--bad)}.i-warn .tag{background:var(--warn-soft);color:var(--warn)}.i-ok .tag{background:var(--ok-soft);color:var(--ok)}
+.i-info .tag{background:var(--sunk);color:var(--muted);border:1px solid var(--line)}.i-acc .tag{background:var(--accent);color:var(--surface)}
+.nextstep{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--accent-soft);font-size:13.5px}
+.nextstep span{flex:1;min-width:220px}
+.howto{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:12.5px;margin:0 0 12px;padding:10px 12px;border-radius:8px;background:var(--sunk);border:1px solid var(--line)}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+ol.steps li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+ol.steps li.ok{background:var(--sunk)}
+ol.steps .sn{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:var(--sunk);border:1px solid var(--line)}
+ol.steps li.ok .sn{background:var(--ok);color:var(--surface);border-color:var(--ok)}
+ol.steps li.part .sn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+ol.steps .sb{min-width:0}
+ol.steps .sa{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:640px){ol.steps li{grid-template-columns:auto 1fr}ol.steps .sa{grid-column:1/-1;justify-content:flex-start}}
+#focusE,#simV{max-width:min(300px,70vw)}
+.pnav{display:flex;justify-content:space-between;gap:12px;margin-top:6px}
+.pnav button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:10px 14px;min-width:0;max-width:48%}
+.pnav button.nx{align-items:flex-end;margin-left:auto;border-color:var(--accent)}
+.pnav small{font-weight:500;color:var(--muted);font-size:11.5px}
+.explist{display:flex;flex-direction:column;gap:8px}
+.explist button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:12px 14px}
+.explist button span{font-weight:400;color:var(--muted);font-size:12.5px}
+/* versión liviana */
+nav.tabs{gap:4px;padding-block:4px 0}
+nav.tabs button{flex-direction:row;align-items:center;gap:8px}
+nav.tabs .tn{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--sunk);border:1px solid var(--line);color:var(--muted)}
+nav.tabs button[aria-selected="true"] .tn{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+nav.tabs .tl{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+nav.tabs .tmore{margin-left:auto}
+.menubtn{border-color:var(--accent);color:var(--accent)}
+.qm{width:20px;height:20px;padding:0;border-radius:50%;font-size:12px;font-weight:700;line-height:1;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-left:4px;color:var(--accent);border-color:var(--accent);background:var(--surface)}
+.tarea{border-color:var(--accent)}
+.tarea.done{border-color:var(--ok);background:var(--ok-soft)}
+.dots{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.dot2{width:30px;height:30px;padding:0;border-radius:50%;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;background:var(--surface)}
+.dot2.ok{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.dot2.part{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.dot2.cur{outline:3px solid var(--accent);outline-offset:2px}
+.semgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.semit{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;align-items:center;text-align:left;padding:12px;font-weight:400}
+.semit .sdot{width:14px;height:14px;border-radius:50%;grid-row:span 2;background:var(--line)}
+.semit .sdot.n1{background:var(--ok)}.semit .sdot.n2{background:var(--warn)}.semit .sdot.n3{background:var(--bad)}
+.semit .sname{font-weight:700}
+.semit .sval{font-family:var(--f-display);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.semit .sval small{font-family:var(--f-body);font-size:12px;font-weight:500;color:var(--muted)}
+.semit .sef,.semit .sproy{grid-column:2;font-size:12px}
+.semit .sef.fav{color:var(--ok);font-weight:600}.semit .sef.desf{color:var(--bad);font-weight:600}
+.semit .sproy{color:var(--muted)}
+.semit .rec{color:var(--ink)}.semit .rec.al{color:var(--warn);font-weight:600}
+.slist{display:flex;flex-direction:column;gap:8px}
+.sitem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;text-align:left;padding:10px 12px;font-weight:400}
+.sitem.rev{border-color:var(--bad)}
+.sitem .stit{font-weight:700;display:flex;flex-direction:column}.sitem .stit small{font-weight:400;color:var(--muted);font-size:12px}
+.sitem .smeta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:12px}
+.kdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-left:3px;background:var(--line)}
+.kdot.ok{background:var(--ok)}.kdot.warn{background:var(--warn)}.kdot.bad{background:var(--bad)}
+details.det{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+details.det>summary{cursor:pointer;padding:14px 16px;display:flex;flex-direction:column;gap:2px;list-style:none}
+details.det>summary::-webkit-details-marker{display:none}
+details.det>summary b{color:var(--accent)}details.det>summary b::before{content:"▸ ";}details.det[open]>summary b::before{content:"▾ "}
+details.det>summary span{font-size:12.5px;color:var(--muted)}
+details.det .detin{display:flex;flex-direction:column;gap:18px;padding:0 12px 14px}
+details.mas{margin-top:8px}details.mas summary{cursor:pointer;font-size:13px;color:var(--accent);font-weight:600}
+details.aviso{font-size:12.5px;color:var(--muted);border:1px dashed var(--warn);border-radius:8px;padding:6px 12px;background:var(--warn-soft)}
+details.aviso summary{cursor:pointer}details.aviso p{margin:6px 0 0}
+details.advf{border-top:1px solid var(--line);padding-top:10px}details.advf summary{cursor:pointer;font-weight:600;font-size:13px}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.wbtn{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;font-weight:400}
+.wbtn b{font-size:16px}.wbtn span:last-child{color:var(--muted);font-size:13px}
+.wbtn .num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+@media (max-width:640px){.brand span{display:none}nav.tabs .tl small{display:none}nav.tabs button{padding:8px 8px 7px}.sitem{grid-template-columns:auto 1fr}.sitem .smeta{grid-column:1/-1;align-items:flex-start}}
+.gflow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:8px;align-items:stretch}
+.gstep{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--sunk);display:flex;flex-direction:column;gap:4px;min-width:0}
+.gstep h3{margin:4px 0 0}.gstep p{margin:4px 0 0;font-size:13px}
+.gstep .num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.garrow{align-self:center;color:var(--accent);font-size:20px;font-weight:700}
+ol.gol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.guiago{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-color:var(--accent)}
+@media (max-width:900px){.gflow{grid-template-columns:1fr}.garrow{transform:rotate(90deg);justify-self:center}}
+.actstrip{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:10px 14px;font-size:13px}
+.actl{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.actl .ago{color:var(--muted);font-size:12px;white-space:nowrap}
+.live{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
+.franja{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 12px;border:1px dashed var(--line);border-radius:8px;font-size:13px;background:var(--surface)}
+.chain{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.chain .step{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--sunk);display:flex;flex-direction:column;gap:8px;min-width:0}
+.chain .num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+ul.plain{margin:4px 0 0;padding-left:16px;font-size:13px}
+.chip{font-family:var(--f-mono);font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:1px 6px;background:var(--sunk)}
+.chip.alert{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.banner{border:1px dashed var(--warn);background:var(--warn-soft);color:var(--ink);border-radius:var(--r);padding:10px 14px;font-size:13px}
+.banner b{color:var(--warn)}
+.empty{border:1px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.vc{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.vc .slot{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--sunk);min-height:90px;display:flex;flex-direction:column;gap:5px}
+.vc .slot h4{margin:0;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.vc .apoyo{grid-column:span 5;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.fd{font-size:12px;line-height:1.3;border-left:3px solid var(--ok);padding-left:6px}
+.fd.d{border-left-color:var(--bad)}
+.fd.ext{border-left:3px dashed var(--accent);color:var(--accent);background:var(--accent-soft);border-radius:0 4px 4px 0;padding:2px 6px}
+.strat{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.strat .card{display:flex;flex-direction:column;gap:8px}
+.strat .card.rev{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad) inset}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+ul.tac{margin:0;padding-left:18px;font-size:13px}
+svg text{font-family:var(--f-body)}
+.svgbox{overflow-x:auto}
+.method p,.method li{max-width:72ch}
+.method code{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);padding:1px 4px;border-radius:4px}
+.sim{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.sim label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+/* modal */
+#modal{position:fixed;inset:0;z-index:20;background:rgba(10,20,25,.45);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 24px max(12px,env(safe-area-inset-left,0px))}
+#modal[hidden]{display:none!important}
+.dlg{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:min(720px,100%);padding:18px;display:flex;flex-direction:column;gap:12px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted);min-width:0}
+.form label.full{grid-column:1/-1}
+.form label.chk{flex-direction:row;align-items:center;gap:8px}
+.form .hint{font-weight:400;font-size:11.5px}
+.multi{display:flex;flex-wrap:wrap;gap:6px;border:1px solid var(--line);border-radius:8px;padding:8px;max-height:170px;overflow:auto}
+.multi label{flex-direction:row;align-items:center;gap:5px;font-weight:500;color:var(--ink);font-size:12.5px;border:1px solid var(--line);border-radius:6px;padding:3px 7px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:8px;font-size:13px;max-width:calc(100% - 32px)}
+@media (max-width:720px){.form{grid-template-columns:1fr}.vc{grid-template-columns:1fr 1fr}.vc .apoyo{grid-column:span 2;grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.card,.tile{transition:border-color .15s}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="topin">
+      <div class="brand"><b>Strategy App</b><span>USB Bogotá · 2026-2</span></div>
+      <label class="row" style="gap:6px"><span class="muted" style="font-size:12px">Empresa</span>
+        <select id="empSel" aria-label="Empresa"><option value="">Cargando…</option></select></label>
+      <button id="btnMenu" class="menubtn">Menú</button>
+      <div hidden><button id="btnNewEmp">Nueva empresa</button><button id="btnEditEmp">Datos de la empresa</button><button id="btnCopias">Copias</button><button id="btnExport" hidden>Exportar</button></div>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+  </div>
+</header>
+<div class="wrap"><main id="view"><div class="empty">Conectando con la base de datos del proyecto…</div></main></div>
+<div id="modal" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+"use strict";
+/* ---------- utilidades ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=v=>{if(v===""||v==null)return null;const n=Number(v);return isFinite(n)?n:null};
+const fmt=(n,d=2)=>(n==null||!isFinite(n))?"—":Number(n).toLocaleString("es-CO",{minimumFractionDigits:d,maximumFractionDigits:d});
+const cop=n=>(n==null||!isFinite(n))?"—":"$ "+Number(n).toLocaleString("es-CO",{maximumFractionDigits:0});
+const today=()=>new Date().toISOString().slice(0,10);
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,3200)}
+
+const TABS=[
+ ["guia","Cómo funciona","Instrucciones"],
+ ["entradas","Entradas","Lo que se llena"],
+ ["proyecto","Proyecto","Objetivos y avance"],
+ ["tablero","Tablero","Salida integrada"],
+ ["entorno","I · Entorno","Macroeconomía"],
+ ["interno","II · Interno","Planeación Estratégica"],
+ ["estrategia","III · Puesta en marcha","Gerencia Estratégica"],
+ ["sintesis","Síntesis","Diagnóstico en contexto"],
+ ["traza","Mapa de decisiones","Trazabilidad y alarmas"],
+ ["metodo","Método","Fórmulas · para el comité"]
+];
+const COLS=["variables","pestel","internos","unidades","estrategias","kpis","tareas"];
+const PREFIX={variables:"V",pestel:"P",internos:"F",unidades:"U",estrategias:"E",kpis:"K",tareas:"T"};
+const tacticasDe=s=>String(s&&s.tacticas||"").split(/\n+/).map(t=>t.replace(/^\s*[-•]\s*/,"").trim()).filter(Boolean);
+const fDate=d=>{if(!d)return"—";const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:esc(d)};
+const ESLABONES=[["log_in","Logística interna"],["oper","Operaciones"],["log_out","Logística externa"],["mkt","Marketing y ventas"],["serv","Servicio"]];
+const APOYO=[["infra","Infraestructura"],["rrhh","Talento humano"],["tec","Tecnología"],["abast","Abastecimiento"]];
+const ADL_M=[["embrionaria","Embrionaria"],["crecimiento","Crecimiento"],["madurez","Madurez"],["envejecimiento","Envejecimiento"]];
+const ADL_P=[["dominante","Dominante"],["fuerte","Fuerte"],["favorable","Favorable"],["sostenible","Sostenible"],["debil","Débil"]];
+// Zonas orientativas de la matriz ADL (filas = posición, columnas = madurez)
+const ADL_Z={dominante:["DN","DN","DN","DN"],fuerte:["DN","DN","DN","DS"],favorable:["DN","DS","DS","PV"],sostenible:["DS","DS","PV","AB"],debil:["PV","PV","AB","AB"]};
+const ADL_TXT={DN:"Desarrollo natural",DS:"Desarrollo selectivo",PV:"Probar viabilidad",AB:"Retiro / abandono"};
+const PESTEL=[["P","Político"],["E","Económico"],["S","Social"],["T","Tecnológico"],["A","Ambiental"],["L","Legal"]];
+
+const S={db:null,dl:null,empresas:[],eid:null,emp:null,d:{},tab:"entorno",det:{},pasoSel:{},asig:null,subs:[],sim:{vid:"",shock:""},canWrite:true};
+COLS.forEach(c=>S.d[c]=[]);
+try{const t=localStorage.getItem("sa_tab");if(t&&TABS.some(x=>x[0]===t))S.tab=t;S.asig=localStorage.getItem("sa_asig")||null;S.guiaVista=localStorage.getItem("sa_guia")==="1"}catch(e){}
+if(location.hash&&TABS.some(x=>x[0]===location.hash.slice(1)))S.tab=location.hash.slice(1);
+
+/* ---------- series y estadística ---------- */
+function parseSerie(txt){
+  const out=[];String(txt||"").split(/\n+/).forEach(line=>{
+    line=line.trim();if(!line)return;const parts=line.split(/[;\t]|\s{2,}/);if(parts.length<2)return;
+    const p=parts[0].trim();let v=parts[parts.length-1].trim();
+    if(v.includes(",")&&v.includes("."))v=v.replace(/\./g,"").replace(",",".");else v=v.replace(",",".");
+    const n=Number(v);if(p&&isFinite(n))out.push({p,v:n});
+  });
+  return out.sort((a,b)=>a.p<b.p?-1:a.p>b.p?1:0);
+}
+const serieTxt=arr=>(arr||[]).map(o=>o.p+";"+o.v).join("\n");
+const sortS=arr=>[...(arr||[])].filter(o=>o&&o.p!=null&&isFinite(o.v)).sort((a,b)=>a.p<b.p?-1:a.p>b.p?1:0);
+function lagChange(serie,tr,lag){const s=sortS(serie),m=new Map();
+  for(let i=lag;i<s.length;i++){const a=s[i-lag].v,b=s[i].v;
+    if(tr==="raw")m.set(s[i].p,b);else if(tr==="diff")m.set(s[i].p,b-a);else if(a!==0)m.set(s[i].p,(b/a-1)*100)}
+  return m}
+function stats(xm,ym){const xs=[],ys=[];xm.forEach((x,p)=>{if(ym.has(p)){xs.push(x);ys.push(ym.get(p))}});
+  const n=xs.length;if(n<3)return{n,r:null,beta:null,r2:null};
+  const mx=xs.reduce((a,b)=>a+b,0)/n,my=ys.reduce((a,b)=>a+b,0)/n;let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){const dx=xs[i]-mx,dy=ys[i]-my;sxy+=dx*dy;sxx+=dx*dx;syy+=dy*dy}
+  if(sxx===0||syy===0)return{n,r:null,beta:null,r2:null};
+  const r=sxy/Math.sqrt(sxx*syy);return{n,r,beta:sxy/sxx,r2:r*r}}
+function ieCell(mefe,mefi){if(mefe==null||mefi==null)return null;
+  const row=mefe>=3?0:mefe>=2?1:2,col=mefi>=3?0:mefi>=2?1:2;const n=row*3+col;
+  const rom=["I","II","III","IV","V","VI","VII","VIII","IX"][n];
+  const zona=[0,1,3].includes(n)?"Crecer y construir":[2,4,6].includes(n)?"Conservar y mantener":"Cosechar o desinvertir";
+  return{row,col,rom,zona}}
+
+/* ---------- Módulo I: volatilidad, exposición y proyecciones ---------- */
+const CANALES=[["pib","Ciclo económico (PIB)"],["inflacion","Inflación"],["tasa","Tasa de interés"],["trm","Tasa de cambio"],["desempleo","Empleo"],["confianza","Confianza del consumidor"],["otro","Otro"]];
+const NIVEL_TXT=["","Normal","Inusual","Muy inusual"];
+const EXP_TXT=["","Baja","Media","Alta"];
+const sd=a=>{if(a.length<2)return null;const m=a.reduce((x,y)=>x+y,0)/a.length;return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(a.length-1))};
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const unidadMov=v=>v.transformacion==="pct"?"%":"pp";
+// Movimiento de un periodo al siguiente y su comparación con el movimiento típico de la ventana reciente
+function volatilidad(v,shock){
+  const s=sortS(v.serie);if(s.length<6)return null;const steps=[];
+  for(let i=1;i<s.length;i++){const a=s[i-1].v,b=s[i].v;steps.push(v.transformacion==="pct"?(a?(b/a-1)*100:0):b-a)}
+  const W=Math.max(6,num(v.ventana)||12);
+  const hist=(shock!=null?steps:steps.slice(0,-1)).slice(-W);
+  const last=shock!=null?shock:steps[steps.length-1];
+  const mu=mean(hist),sig=sd(hist);if(!sig)return null;
+  const z=(last-mu)/sig,az=Math.abs(z);const nivel=az<1?1:az<2?2:3;
+  const rec=sd(steps.slice(-4)),ratio=rec!=null?rec/sig:null;
+  return{steps,last,mu,sig,z,nivel,ratio,W,periodo:s[s.length-1].p,valor:s[s.length-1].v,simulado:shock!=null}
+}
+// Efecto de una SUBIDA de la variable para la empresa: +1 favorable, −1 desfavorable
+function efectoSubida(v,e){
+  if(v.efectoSubida==="favorable")return 1;if(v.efectoSubida==="desfavorable")return -1;
+  const aseg=e.tipoEmpresa==="aseguradora";
+  switch(v.canal){case"pib":return 1;case"inflacion":return -1;case"tasa":return aseg?1:-1;
+    case"trm":return(e.importa==="si"||e.deudaUSD==="si")?-1:(e.exporta==="si"?1:-1);
+    case"desempleo":return -1;case"confianza":return 1;default:return -1}
+}
+function proyResumen(v,s){
+  const P=(v.proy||[]).filter(p=>num(p.valor)!=null);const last=s.length?s[s.length-1].v:null;
+  const y=new Date().getFullYear();const prox=P.filter(p=>String(p.horizonte).includes(String(y))&&p.tipo!=="promedio");
+  const m=prox.length?mean(prox.map(p=>num(p.valor))):null;
+  let dir=null;if(m!=null&&last!=null&&Math.abs(m-last)>1e-9)dir=Math.sign(m-last);
+  return{P,prox:m,dir,anio:y}
+}
+// Estados financieros simplificados (3 años) → lecturas de exposición
+function finanzas(e,vars){
+  const rows=[...(e.financieros||[])].filter(r=>r&&num(r.anio)!=null).sort((a,b)=>num(a.anio)-num(b.anio));
+  const vP=vars.find(v=>v.canal==="pib"),vI=vars.find(v=>v.canal==="inflacion");
+  const pibAnual=y=>{if(!vP)return null;const xs=sortS(vP.serie).filter(o=>String(o.p).startsWith(y+"-")).map(o=>o.v);return xs.length===4?mean(xs):null};
+  const inflDic=y=>{if(!vI)return null;const o=sortS(vI.serie).find(o=>o.p===y+"-T4");return o?o.v:null};
+  const out=rows.map((r,i)=>{const p=i?rows[i-1]:null;const ing=num(r.ingresos),egr=num(r.egresos),ut=num(r.utilidad),A=num(r.activos),Pa=num(r.pasivos),Pt=num(r.patrimonio);
+    const g=(x,y)=>(x!=null&&y)?(x/y-1)*100:null;const gIng=p?g(ing,num(p.ingresos)):null,gEgr=p?g(egr,num(p.egresos)):null;
+    const pi=inflDic(r.anio),pib=pibAnual(r.anio);const real=(gIng!=null&&pi!=null)?((1+gIng/100)/(1+pi/100)-1)*100:null;
+    const mult=(real!=null&&pib)?real/pib:null;const margen=(ut!=null&&ing)?ut/ing*100:null;const endeud=(Pa!=null&&A)?Pa/A*100:null;
+    const cuadre=(A!=null&&Pa!=null&&Pt!=null&&A)?Math.abs(A-(Pa+Pt))/A:null;
+    return{...r,ing,egr,ut,A,Pa,Pt,gIng,gEgr,pi,pib,real,mult,margen,endeud,cuadre}});
+  return{rows:out,ult:out.length?out[out.length-1]:null,n:out.length}
+}
+function exposicion(v,e,FX){
+  const m=num(v.exposicionManual);if(m>=1&&m<=3)return{n:m,why:"Asignada por el equipo."+(v.exposicionNota?" "+v.exposicionNota:"")};
+  const u=FX.ult,aseg=e.tipoEmpresa==="aseguradora";
+  const viaPIB=()=>{if(!u||u.mult==null)return null;const a=Math.abs(u.mult);return{n:a>=1.5?3:a>=0.5?2:1,why:`En ${u.anio} los ingresos reales crecieron ${fmt(u.real,1)} % frente a ${fmt(u.pib,1)} % del PIB: ${fmt(u.mult,1)} veces la economía.`}};
+  switch(v.canal){
+    case"pib":return viaPIB();
+    case"inflacion":{if(!u||u.gIng==null)return null;const pierde=u.real!=null&&u.real<0,egrMas=u.gEgr!=null&&u.gEgr>u.gIng;
+      const n=pierde&&egrMas?3:(pierde||egrMas)?2:1;return{n,why:`Ingresos ${fmt(u.gIng,1)} % nominal (${fmt(u.real,1)} % real); egresos ${fmt(u.gEgr,1)} %. ${egrMas?"Los egresos crecieron más rápido que los ingresos.":"Los ingresos crecieron más rápido que los egresos."}`}}
+    case"tasa":{if(!u||u.endeud==null)return null;if(aseg)return{n:2,why:`Endeudamiento ${fmt(u.endeud,0)} %, normal en una aseguradora por sus reservas técnicas. Una subida de tasas suele favorecer el rendimiento de sus inversiones.`};
+      const n=u.endeud>60?3:u.endeud>=40?2:1;return{n,why:`Pasivo / activo = ${fmt(u.endeud,0)} % (referencia orientativa: menos de 40 % baja, más de 60 % alta).`}}
+    case"trm":{const k=["importa","exporta","deudaUSD"].filter(x=>e[x]==="si").length;const nsa=["importa","exporta","deudaUSD"].filter(x=>!e[x]||e[x]==="nsa").length;
+      if(nsa===3)return null;return{n:k>=2?3:k===1?2:1,why:`Importa: ${({si:"sí",no:"no"})[e.importa]||"sin dato"} · exporta: ${({si:"sí",no:"no"})[e.exporta]||"sin dato"} · deuda en dólares: ${({si:"sí",no:"no"})[e.deudaUSD]||"sin dato"}.`}}
+    case"desempleo":case"confianza":{if(aseg)return{n:2,why:"Afecta la compra de seguros voluntarios de hogares y personas."};const r=viaPIB();return r?{n:r.n,why:"Empresa de consumo: se lee igual que el ciclo económico. "+r.why}:null}
+    default:return null}
+}
+
+/* ---------- Conexión Módulo I → Módulo II ---------- */
+// Corte BCG = crecimiento nominal esperado de la economía: (1 + PIB real proyectado) × (1 + inflación esperada) − 1
+function corteBCG(e,V){
+  const man=num(e.bcgCorte)??10;if(e.bcgCorteModo==="manual")return{corte:man,auto:false,why:"Corte fijado a mano por el equipo."};
+  const p=V.find(v=>v.canal==="pib"),i=V.find(v=>v.canal==="inflacion");const g=p&&p.pr.prox,pi=i&&i.pr.prox;
+  if(g==null||pi==null)return{corte:man,auto:false,why:"Sin proyecciones de PIB e inflación: se usa el corte manual."};
+  const c=((1+g/100)*(1+pi/100)-1)*100;
+  return{corte:c,auto:true,why:`Un mercado crece "alto" si supera el crecimiento nominal esperado de la economía en ${p.pr.anio}: PIB real ${fmt(g,2)} % y inflación ${fmt(pi,2)} % (promedio de proyecciones del Módulo I).`}}
+// Canal macro → eslabón de la cadena de valor donde golpea
+const CANAL_ESLABON={trm:"abast",inflacion:"oper",tasa:"infra",pib:"mkt",desempleo:"mkt",confianza:"mkt"};
+// Fortalezas y debilidades sugeridas a partir de los estados financieros simplificados
+function sugerenciasMEFI(C){
+  const e=S.emp,R=C.FX.rows,u=C.FX.ult,p=R.length>1?R[R.length-2]:null,out=[];if(!u)return out;const y=u.anio,aseg=e.tipoEmpresa==="aseguradora";
+  const add=(clave,tipo,eslabon,factor,evid)=>out.push({clave:clave+"-"+y,tipo,eslabon,factor,evidencia:evid+` Fuente: estados financieros simplificados (Módulo I), año ${y}.`});
+  if(u.mult!=null){if(u.mult>=1.2)add("fin-crec","F","mkt","Crece más rápido que la economía",`Ingresos reales +${fmt(u.real,1)} % frente a PIB ${fmt(u.pib,1)} %: ${fmt(u.mult,1)} veces la economía.`);
+    else if(u.mult<0.8)add("fin-crec","D","mkt","Crece más despacio que la economía",`Ingresos reales ${fmt(u.real,1)} % frente a PIB ${fmt(u.pib,1)} %: ${fmt(u.mult,1)} veces la economía.`)}
+  if(u.real!=null&&u.real<0)add("fin-real","D","mkt","Los ingresos pierden frente a la inflación",`Ingresos +${fmt(u.gIng,1)} % nominal, ${fmt(u.real,1)} % real con inflación de ${fmt(u.pi,2)} %.`);
+  if(u.gEgr!=null&&u.gIng!=null){if(u.gEgr>u.gIng)add("fin-costos","D","oper","Los egresos crecen más rápido que los ingresos",`Egresos +${fmt(u.gEgr,1)} % frente a ingresos +${fmt(u.gIng,1)} %.`);
+    else add("fin-costos","F","oper","Control de costos: los egresos crecen menos que los ingresos",`Egresos +${fmt(u.gEgr,1)} % frente a ingresos +${fmt(u.gIng,1)} %.`)}
+  if(p&&u.margen!=null&&p.margen!=null&&Math.abs(u.margen-p.margen)>=0.1){if(u.margen>p.margen)add("fin-margen","F","infra","Mejora del margen neto",`Margen neto pasa de ${fmt(p.margen,1)} % a ${fmt(u.margen,1)} %.`);
+    else add("fin-margen","D","infra","Deterioro del margen neto",`Margen neto pasa de ${fmt(p.margen,1)} % a ${fmt(u.margen,1)} %.`)}
+  if(u.endeud!=null){if(aseg){if(p&&p.Pt&&u.Pt>p.Pt)add("fin-patrimonio","F","infra","Fortalecimiento patrimonial",`Patrimonio +${fmt((u.Pt/p.Pt-1)*100,1)} % en el año; endeudamiento de ${fmt(u.endeud,0)} %, propio de una aseguradora por sus reservas técnicas.`)}
+    else if(u.endeud>60)add("fin-deuda","D","infra","Endeudamiento alto",`Pasivo / activo = ${fmt(u.endeud,0)} % (referencia orientativa: más de 60 % es alto).`);
+    else if(u.endeud<40)add("fin-deuda","F","infra","Bajo endeudamiento",`Pasivo / activo = ${fmt(u.endeud,0)} % (referencia orientativa: menos de 40 % es bajo).`)}
+  const usados=new Set(S.d.internos.map(f=>f.origen).filter(Boolean));out.forEach(o=>o.usado=usados.has(o.clave));return out}
+
+/* ---------- cálculo integrado ---------- */
+function compute(){
+  const e=S.emp||{},d=S.d,lag=e.comparacion==="trimestral"?1:4;
+  const rev=lagChange(e.ingresos,"pct",lag);
+  const metodo=e.metodoPeso==="correlacion"?"correlacion":"exposicion";
+  const FX=finanzas(e,d.variables);
+  const V=d.variables.map(v=>{
+    const ch=lagChange(v.serie,v.transformacion,lag),st=stats(ch,rev);const s=sortS(v.serie);
+    const simOn=S.sim.vid===v.id&&num(S.sim.shock)!=null;
+    const vol=volatilidad(v,simOn?num(S.sim.shock):null);
+    const mov=vol?vol.steps[vol.steps.length-1]:null;const movEf=vol?vol.last:null;
+    const umbral=num(v.umbral);
+    const alerta=umbral!=null?(movEf!=null&&Math.abs(movEf)>=umbral):!!(vol&&vol.nivel===3);
+    const lastCh=[...ch.values()].pop();
+    const ef=efectoSubida(v,e);
+    const exp=exposicion(v,e,FX);
+    // Tipo O/A: método de exposición = dirección del último movimiento × efecto de una subida para esta empresa
+    let sugExp=null;if(movEf!=null&&movEf!==0)sugExp=Math.sign(movEf)*ef>0?"O":"A";
+    const proy=proyResumen(v,s);
+    if(sugExp==null&&proy.dir)sugExp=proy.dir*ef>0?"O":"A";
+    const sugCorr=(st.r!=null&&lastCh!=null)?(st.r*lastCh>=0?"O":"A"):null;
+    const sug=metodo==="correlacion"?sugCorr:sugExp;
+    const tipo=(v.tipoManual==="O"||v.tipoManual==="A")?v.tipoManual:sug;
+    const impacto=(st.beta!=null&&movEf!=null)?st.beta*movEf:null;
+    const riesgo=(exp&&vol)?exp.n*vol.nivel:null;
+    const proyEfecto=proy.dir?(proy.dir*ef>0?"fav":"desf"):null;
+    return{...v,...st,ultimo:s.length?s[s.length-1]:null,mov,movEf,simOn,alerta,sug,tipo,impacto,expl:st.n<12,vol,exp,ef,riesgo,pr:proy,proyEfecto}
+  });
+  const sumAbs=V.reduce((a,v)=>a+(v.r!=null?Math.abs(v.r):0),0);
+  const sumRisk=V.reduce((a,v)=>a+(v.riesgo||0),0);
+  V.forEach(v=>{v.pesoCorr=(v.r!=null&&sumAbs>0)?Math.abs(v.r)/sumAbs:null;v.pesoExp=(v.riesgo!=null&&sumRisk>0)?v.riesgo/sumRisk:null;
+    v.peso=metodo==="correlacion"?v.pesoCorr:v.pesoExp;const c=num(v.calificacion);v.pond=(v.peso!=null&&c!=null)?v.peso*c:null});
+  const mefe=V.some(v=>v.pond!=null)?V.reduce((a,v)=>a+(v.pond||0),0):null;
+  const F=d.internos.map(f=>{const p=num(f.peso),c=num(f.calificacion);return{...f,p,c,pond:(p!=null&&c!=null)?p*c:null}});
+  const sumPesoF=F.reduce((a,f)=>a+(f.p||0),0);
+  const mefi=F.some(f=>f.pond!=null)?F.reduce((a,f)=>a+(f.pond||0),0):null;
+  const vById=new Map(V.map(v=>[v.id,v])),pById=new Map(d.pestel.map(p=>[p.id,p])),fById=new Map(F.map(f=>[f.id,f]));
+  const E=d.estrategias.map(s=>{const vs=(s.variables||[]).map(id=>vById.get(id)).filter(Boolean);
+    const alertV=vs.filter(v=>v.alerta);return{...s,vs,ps:(s.externos||[]).map(id=>pById.get(id)).filter(Boolean),
+    fs:(s.factores||[]).map(id=>fById.get(id)).filter(Boolean),alertV,rev:alertV.length>0}});
+  const eById=new Map(E.map(s=>[s.id,s]));
+  const K=d.kpis.map(k=>{const b=num(k.lineaBase),m=num(k.meta),a=num(k.actual);let prog=null;
+    if(b!=null&&m!=null&&a!=null&&m!==b)prog=(a-b)/(m-b);
+    // Semáforo: rojo 0–59 %, amarillo 60–95 %, verde por encima de 95 %
+    const sem=prog==null?"sin":prog>.95?"ok":prog>=.6?"warn":"bad";const s=eById.get(k.estrategia);
+    return{...k,prog,sem,est:s||null,rev:!!(s&&s.rev)}});
+  E.forEach(s=>s.ks=K.filter(k=>k.estrategia===s.id));
+  const T=(d.tareas||[]).map(t=>{const est=eById.get(t.estrategia)||null;const tacOk=!!(est&&tacticasDe(est).includes(t.tactica));
+    const fechaMal=!!(t.inicio&&t.fin&&t.fin<t.inicio);const fueraPlazo=!!(est&&((est.inicio&&t.inicio&&t.inicio<est.inicio)||(est.fin&&t.fin&&t.fin>est.fin)));
+    const completa=!!(t.tarea&&t.inicio&&t.fin&&t.responsable&&t.recursos);return{...t,est,tacOk,fechaMal,fueraPlazo,completa}});
+  E.forEach(s=>s.ts=T.filter(t=>t.estrategia===s.id));
+  const bcg=corteBCG(e,V);const U=d.unidades.map(u=>{const g=num(u.crecimiento),q=num(u.participacion),corte=bcg.corte;
+    let cuad=null;if(g!=null&&q!=null)cuad=g>=corte?(q>=1?"Estrella":"Interrogante"):(q>=1?"Vaca":"Perro");return{...u,g,q,cuad}});
+  const presupuesto=E.reduce((a,s)=>a+(num(s.presupuesto)||0),0);
+  return{V,F,E,K,U,T,FX,metodo,bcg,P:d.pestel,mefe,mefi,sumPesoF,ie:ieCell(mefe,mefi),presupuesto,lag,revN:rev.size}
+}
+const byCode=(a,b)=>String(a.codigo||"").localeCompare(String(b.codigo||""),"es",{numeric:true});
+
+/* ---------- componentes visuales ---------- */
+const semPill={ok:'<span class="pill p-ok"><span class="dot"></span>Verde · cumple</span>',warn:'<span class="pill p-warn"><span class="dot"></span>Amarillo · en camino</span>',bad:'<span class="pill p-bad"><span class="dot"></span>Rojo · lejos de la meta</span>',sin:'<span class="pill p-line">Sin medición</span>'};
+const semLegend='<div class="row" style="gap:6px;font-size:12px;margin-bottom:8px"><span class="muted">Semáforo de cumplimiento:</span><span class="pill p-bad"><span class="dot"></span>0 – 59 %</span><span class="pill p-warn"><span class="dot"></span>60 – 95 %</span><span class="pill p-ok"><span class="dot"></span>más de 95 %</span></div>';
+const tipoPill=t=>t==="O"?'<span class="pill p-ok">Oportunidad</span>':t==="A"?'<span class="pill p-bad">Amenaza</span>':'<span class="pill p-line">—</span>';
+function ieSVG(ie,mefe,mefi){
+  const W=330,H=300,x0=56,y0=20,c=78;let g="";
+  const zone=n=>[0,1,3].includes(n)?"var(--ok-soft)":[2,4,6].includes(n)?"var(--warn-soft)":"var(--bad-soft)";
+  for(let r=0;r<3;r++)for(let k=0;k<3;k++){const n=r*3+k;const on=ie&&ie.row===r&&ie.col===k;
+    g+=`<rect x="${x0+k*c}" y="${y0+r*c}" width="${c}" height="${c}" fill="${zone(n)}" stroke="${on?"var(--accent)":"var(--line)"}" stroke-width="${on?3:1}"/>`;
+    g+=`<text x="${x0+k*c+c/2}" y="${y0+r*c+c/2+6}" text-anchor="middle" font-size="17" font-weight="700" fill="${on?"var(--accent)":"var(--muted)"}">${["I","II","III","IV","V","VI","VII","VIII","IX"][n]}</text>`}
+  ["Fuerte 3–4","Promedio 2–2,99","Débil 1–1,99"].forEach((t,k)=>g+=`<text x="${x0+k*c+c/2}" y="${y0+3*c+16}" text-anchor="middle" font-size="10" fill="var(--muted)">${t}</text>`);
+  ["Alto","Medio","Bajo"].forEach((t,r)=>g+=`<text x="${x0-8}" y="${y0+r*c+c/2+4}" text-anchor="end" font-size="10" fill="var(--muted)">${t}</text>`);
+  g+=`<text x="${x0+1.5*c}" y="${H-2}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">MEFI ${fmt(mefi)}</text>`;
+  g+=`<text transform="translate(12 ${y0+1.5*c}) rotate(-90)" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">MEFE ${fmt(mefe)}</text>`;
+  if(mefe!=null&&mefi!=null){const px=x0+Math.max(0,Math.min(3,(4-mefi)))/3*3*c,py=y0+Math.max(0,Math.min(3,(4-mefe)))/3*3*c;
+    g+=`<circle cx="${px}" cy="${py}" r="7" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`}
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="Matriz interna-externa">${g}</svg>`}
+function sensSVG(V){
+  const vs=V.filter(v=>v.r!=null).sort((a,b)=>Math.abs(b.r)-Math.abs(a.r));if(!vs.length)return '<div class="empty">Carga la serie de ingresos y al menos una variable con tres observaciones comunes.</div>';
+  const W=520,rh=30,H=vs.length*rh+30,x0=170,mid=x0+(W-x0-20)/2,half=(W-x0-20)/2;let g="";
+  g+=`<line x1="${mid}" y1="8" x2="${mid}" y2="${H-18}" stroke="var(--line)"/>`;
+  [-1,-.5,.5,1].forEach(t=>g+=`<line x1="${mid+t*half}" y1="8" x2="${mid+t*half}" y2="${H-18}" stroke="var(--line)" stroke-dasharray="2 3"/><text x="${mid+t*half}" y="${H-4}" text-anchor="middle" font-size="10" fill="var(--muted)">${fmt(t,1)}</text>`);
+  g+=`<text x="${mid}" y="${H-4}" text-anchor="middle" font-size="10" fill="var(--muted)">0</text>`;
+  vs.forEach((v,i)=>{const y=10+i*rh,w=Math.abs(v.r)*half,x=v.r>=0?mid:mid-w;
+    g+=`<text x="${x0-8}" y="${y+15}" text-anchor="end" font-size="11.5" fill="var(--ink)"><tspan font-family="var(--f-mono)" fill="var(--accent)">${esc(v.codigo)}</tspan> ${esc((v.nombre||"").slice(0,20))}</text>`;
+    g+=`<rect x="${x}" y="${y+4}" width="${Math.max(1,w)}" height="16" rx="3" fill="${v.r>=0?"var(--ok)":"var(--bad)"}" opacity=".85"/>`;
+    g+=`<text x="${v.r>=0?mid-6:mid+6}" y="${y+16}" text-anchor="${v.r>=0?"end":"start"}" font-size="11" fill="var(--muted)">r ${fmt(v.r)} · ${fmt((v.peso||0)*100,0)}%</text>`});
+  return `<div class="svgbox"><svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px" role="img" aria-label="Sensibilidad de ingresos">${g}</svg></div>`}
+function bcgSVG(U,corte){
+  const us=U.filter(u=>u.g!=null&&u.q!=null);const W=360,H=300,x0=44,y0=14,w=W-x0-14,h=H-y0-40;
+  const qMax=Math.max(2,...us.map(u=>u.q))*1.1,gMin=Math.min(-5,...us.map(u=>u.g))-2,gMax=Math.max(corte*2,...us.map(u=>u.g))+2;
+  const X=q=>x0+w-(Math.log(q+.1)-Math.log(.1))/(Math.log(qMax+.1)-Math.log(.1))*w; // eje invertido: alta participación a la izquierda
+  const Y=g=>y0+h-(g-gMin)/(gMax-gMin)*h;let g="";
+  const xc=X(1),yc=Y(corte);
+  g+=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="var(--sunk)" stroke="var(--line)"/>`;
+  g+=`<line x1="${xc}" y1="${y0}" x2="${xc}" y2="${y0+h}" stroke="var(--muted)" stroke-dasharray="4 3"/><line x1="${x0}" y1="${yc}" x2="${x0+w}" y2="${yc}" stroke="var(--muted)" stroke-dasharray="4 3"/>`;
+  [["Estrella",x0+6,y0+14,"start"],["Interrogante",x0+w-6,y0+14,"end"],["Vaca",x0+6,y0+h-6,"start"],["Perro",x0+w-6,y0+h-6,"end"]].forEach(a=>g+=`<text x="${a[1]}" y="${a[2]}" text-anchor="${a[3]}" font-size="10.5" font-weight="600" fill="var(--muted)">${a[0]}</text>`);
+  const maxV=Math.max(1,...us.map(u=>num(u.ventas)||1));
+  us.forEach(u=>{const r=8+Math.sqrt((num(u.ventas)||1)/maxV)*18;g+=`<circle cx="${X(u.q)}" cy="${Y(u.g)}" r="${r}" fill="var(--accent)" fill-opacity=".25" stroke="var(--accent)"/><text x="${X(u.q)}" y="${Y(u.g)+4}" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--ink)">${esc(u.codigo)}</text>`});
+  g+=`<text x="${x0+w/2}" y="${H-18}" text-anchor="middle" font-size="10.5" fill="var(--muted)">Participación relativa (escala log; 1,0 = líder)</text><text x="${xc}" y="${H-4}" text-anchor="middle" font-size="10" fill="var(--muted)">1,0</text>`;
+  g+=`<text transform="translate(12 ${y0+h/2}) rotate(-90)" text-anchor="middle" font-size="10.5" fill="var(--muted)">Crecimiento del mercado %</text><text x="${x0-4}" y="${yc+4}" text-anchor="end" font-size="10" fill="var(--muted)">${fmt(corte,0)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="Matriz BCG">${g}</svg>`}
+function adlTable(m,p){
+  const ci=ADL_M.findIndex(x=>x[0]===m);let h='<div class="tbl"><table><thead><tr><th>Posición \\ Madurez</th>'+ADL_M.map(x=>`<th>${x[1]}</th>`).join("")+"</tr></thead><tbody>";
+  ADL_P.forEach(([k,l])=>{h+=`<tr><td><b>${l}</b></td>`+ADL_Z[k].map((z,i)=>{const on=k===p&&i===ci;return `<td style="${on?"background:var(--accent-soft);outline:2px solid var(--accent);outline-offset:-2px;font-weight:700":""}">${ADL_TXT[z]}</td>`}).join("")+"</tr>"});
+  return h+"</tbody></table></div>"}
+function flowSVG(C){
+  const ext=[...C.V.sort(byCode).map(v=>({id:v.id,code:v.codigo,name:v.nombre,kind:"V",alert:v.alerta})),...[...C.P].sort(byCode).map(p=>({id:p.id,code:p.codigo,name:p.factor,kind:"P"}))];
+  const inte=[...C.F].sort(byCode).map(f=>({id:f.id,code:f.codigo,name:f.factor,kind:"F"}));
+  let E=[...C.E].sort(byCode),K=[...C.K].sort(byCode);const fx=S.focusE&&E.find(s=>s.id===S.focusE);
+  const linked=new Set(E.flatMap(s=>[...(s.variables||[]),...(s.externos||[]),...(s.factores||[])]));
+  let extF=ext,intF=inte;
+  if(fx){const ids=new Set([...(fx.variables||[]),...(fx.externos||[]),...(fx.factores||[])]);E=[fx];K=K.filter(k=>k.estrategia===fx.id);extF=ext.filter(n=>ids.has(n.id));intF=inte.filter(n=>ids.has(n.id))}
+  const left=[...extF,{gap:1},...intF];
+  const nh=28,gp=8,top=34;const H=top+Math.max(left.length,E.length,K.length)*(nh+gp)+10;const W=1000,colX=[10,380,720],colW=[250,250,270];
+  const pos={};let g="";let y=top;
+  g+=`<text x="${colX[0]}" y="18" font-size="11" font-weight="700" fill="var(--muted)" letter-spacing=".06em">ORIGEN · ENTORNO (V, P) E INTERNO (F)</text><text x="${colX[1]}" y="18" font-size="11" font-weight="700" fill="var(--muted)" letter-spacing=".06em">DECISIÓN ESTRATÉGICA</text><text x="${colX[2]}" y="18" font-size="11" font-weight="700" fill="var(--muted)" letter-spacing=".06em">INDICADOR QUE LA VIGILA</text>`;
+  const node=(n,x,w,yy,state)=>{const stroke=state==="bad"?"var(--bad)":state==="acc"?"var(--accent)":"var(--line)";const fill=state==="bad"?"var(--bad-soft)":"var(--surface)";
+    return `<rect x="${x}" y="${yy}" width="${w}" height="${nh}" rx="6" fill="${fill}" stroke="${stroke}" stroke-width="${state==="bad"?2:1}"/><text x="${x+8}" y="${yy+18}" font-size="11.5" fill="var(--ink)"><tspan font-family="var(--f-mono)" font-weight="600" fill="${state==="bad"?"var(--bad)":"var(--accent)"}">${esc(n.code||"")}</tspan>  ${esc(String(n.name||"").slice(0,30))}</text>`};
+  left.forEach(n=>{if(n.gap){y+=nh/2;return}pos[n.id]={x:colX[0]+colW[0],y:y+nh/2};g+=`<g opacity="${fx||linked.has(n.id)?1:.4}">`+node(n,colX[0],colW[0],y,n.alert?"bad":"")+`</g>`;y+=nh+gp});
+  E.forEach((s,i)=>{const yy=top+i*(nh+gp);pos[s.id]={xl:colX[1],xr:colX[1]+colW[1],y:yy+nh/2}});
+  K.forEach((k,i)=>{const yy=top+i*(nh+gp);pos[k.id]={xl:colX[2],y:yy+nh/2}});
+  let lines="";const curve=(x1,y1,x2,y2,c,wd)=>`<path d="M${x1} ${y1} C${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}" fill="none" stroke="${c}" stroke-width="${wd}" opacity="${c==="var(--bad)"?1:.55}"/>`;
+  E.forEach(s=>{const t=pos[s.id];[...(s.variables||[]),...(s.externos||[]),...(s.factores||[])].forEach(id=>{const o=pos[id];if(!o)return;const al=s.alertV.some(v=>v.id===id);lines+=curve(o.x,o.y,t.xl,t.y,al?"var(--bad)":"var(--accent)",al?2.4:1.2)})});
+  K.forEach(k=>{const s=E.find(x=>x.id===k.estrategia);if(!s)return;const o=pos[s.id],t=pos[k.id];lines+=curve(o.xr,o.y,t.xl,t.y,s.rev?"var(--bad)":"var(--accent)",s.rev?2.4:1.2)});
+  E.forEach((s,i)=>g+=`<g data-focus="${esc(s.id)}" style="cursor:pointer">`+node({code:s.codigo,name:s.estrategia},colX[1],colW[1],top+i*(nh+gp),s.rev?"bad":"acc")+`</g>`);
+  K.forEach((k,i)=>g+=node({code:k.codigo,name:k.nombre},colX[2],colW[2],top+i*(nh+gp),k.rev?"bad":""));
+  return `<div class="svgbox"><svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:860px" role="img" aria-label="Mapa de trazabilidad">${lines}${g}</svg></div>`}
+
+/* ---------- Lecturas automáticas (insights) por módulo ---------- */
+const IE_REC={"Crecer y construir":{tipos:["Intensiva","Integración"],txt:"estrategias intensivas (penetración de mercado, desarrollo de mercados o de productos) o de integración"},
+ "Conservar y mantener":{tipos:["Intensiva"],txt:"penetración de mercado y desarrollo de productos"},
+ "Cosechar o desinvertir":{tipos:["Defensiva"],txt:"estrategias defensivas (reducción de costos, desinversión o liquidación selectiva)"}};
+const lista=a=>a.length<=1?a.join(""):a.slice(0,-1).join(", ")+" y "+a[a.length-1];
+const vName=v=>`${v.codigo} ${v.nombre}`;
+const lc1=t=>{t=String(t||"");return /^[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ]/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1)};
+function insightsI(C){
+  const e=S.emp,V=C.V.filter(v=>(v.serie||[]).length),it=[],add=(n,t)=>it.push({n,t});
+  const rojos=V.filter(v=>v.vol&&v.vol.nivel===3),amar=V.filter(v=>v.vol&&v.vol.nivel===2),sube=V.filter(v=>v.vol&&v.vol.ratio>1.25);
+  if(rojos.length)add("bad",`Alarma roja en ${lista(rojos.map(vName))}: el último movimiento es más de dos veces lo típico. Las decisiones ligadas quedan en revisión.`);
+  if(amar.length)add("warn",`Movimiento inusual en ${lista(amar.map(vName))} (entre una y dos veces lo típico). Conviene vigilarlo.`);
+  if(!rojos.length&&!amar.length&&V.length)add("ok","Ninguna variable muestra un movimiento fuera de lo normal en el último periodo.");
+  C.V.filter(v=>v.reciente&&v.reciente.alerta&&v.reciente.texto).forEach(v=>add("warn",`Señal reciente en ${v.nombre}, posterior al último trimestre cerrado: ${v.reciente.texto}`));
+  if(sube.length)add("warn",`La volatilidad viene en aumento en ${lista(sube.map(vName))}: los últimos movimientos son más bruscos que los de los tres años previos.`);
+  const A=V.filter(v=>v.tipo==="A"&&v.peso!=null).sort((a,b)=>b.peso-a.peso),O=V.filter(v=>v.tipo==="O"&&v.peso!=null).sort((a,b)=>b.peso-a.peso);
+  if(A[0])add("bad",`Principal amenaza del entorno: ${vName(A[0])} (peso ${fmt(A[0].peso*100,0)} % en la MEFE). ${A[0].exp?A[0].exp.why:""}`);
+  if(O[0])add("ok",`Principal oportunidad: ${vName(O[0])} (peso ${fmt(O[0].peso*100,0)} %).`);
+  const pd=V.filter(v=>v.proyEfecto==="desf");if(pd.length)add("warn",`Lo que se espera hacia adelante juega en contra en ${lista(pd.map(v=>lc1(v.nombre)))}, según las proyecciones de organismos y analistas.`);
+  const u=C.FX.ult;if(u&&u.mult!=null)add(u.mult>=1?"ok":"warn",`En ${u.anio} ${e.nombre} creció ${fmt(u.mult,1)} veces lo que creció la economía (ingresos reales ${fmt(u.real,1)} % frente a PIB ${fmt(u.pib,1)} %).`);
+  if(C.mefe!=null)add(C.mefe>=2.5?"ok":"warn",`MEFE de ${fmt(C.mefe)}: la empresa responde ${C.mefe>=2.5?"por encima":"por debajo"} del promedio (2,5) a las oportunidades y amenazas del entorno.`);
+  const pend=[];const sinS=C.V.filter(v=>!(v.serie||[]).length);if(sinS.length)pend.push(`${sinS.length} variable(s) sin serie`);
+  const pv=C.V.filter(v=>v.verificacion!=="verificado"&&(v.serie||[]).length);if(pv.length)pend.push(`${pv.length} serie(s) por verificar contra la fuente oficial`);
+  if(C.FX.rows.some(r=>r.verificacion==="ilustrativo"))pend.push("estados financieros ilustrativos");if(C.FX.n<3)pend.push("faltan años de estados financieros");
+  if(pend.length)add("info","Pendiente de datos: "+lista(pend)+".");
+  const ex=V.filter(v=>v.exp&&v.exp.n>=2&&CANAL_ESLABON[v.canal]);const ns=sugerenciasMEFI(C).filter(g=>!g.usado).length;
+  return{it,next:{tab:"interno",t:`En el Módulo II, ${ex.length?lista(ex.map(v=>v.codigo))+" aparecen en la cadena de valor, en el eslabón por donde golpean":"las variables expuestas aparecerán en la cadena de valor"}${ns?`, y hay ${ns} fortaleza(s) o debilidad(es) sugerida(s) desde las cifras financieras para revisar en la MEFI`:""}. El corte de la BCG usa las proyecciones de este módulo.`}}
+}
+function insightsII(C){
+  const e=S.emp,F=C.F,it=[],add=(n,t)=>it.push({n,t});
+  if(C.mefi!=null)add(C.mefi>=2.5?"ok":"warn",`MEFI de ${fmt(C.mefi)}: posición interna ${C.mefi>=2.5?"fuerte":"débil"} frente al promedio de 2,5.`);
+  if(F.length&&Math.abs(C.sumPesoF-1)>.001)add("bad",`Los pesos de la MEFI suman ${fmt(C.sumPesoF)}, no 1,00. El total de la MEFI no es confiable hasta corregirlo.`);
+  const Fo=F.filter(f=>f.tipo!=="D"&&f.pond!=null).sort((a,b)=>b.pond-a.pond),De=F.filter(f=>f.tipo==="D"&&f.p!=null).sort((a,b)=>b.p-a.p);
+  if(Fo[0])add("ok",`Fortaleza principal: ${Fo[0].codigo} ${Fo[0].factor}.`);
+  if(De[0])add("bad",`Debilidad más pesada: ${De[0].codigo} ${De[0].factor}.`);
+  const ESL=[...ESLABONES,...APOYO];const crit=ESL.filter(([k])=>F.some(f=>f.tipo==="D"&&f.eslabon===k)&&C.V.some(v=>v.exp&&v.exp.n>=2&&CANAL_ESLABON[v.canal]===k&&(v.serie||[]).length));
+  crit.forEach(([k,l])=>{const vs=C.V.filter(v=>v.exp&&v.exp.n>=2&&CANAL_ESLABON[v.canal]===k&&(v.serie||[]).length),ds=F.filter(f=>f.tipo==="D"&&f.eslabon===k);
+    add("bad",`Punto crítico en ${l.toLowerCase()}: allí coinciden la exposición a ${lista(vs.map(v=>lc1(v.nombre)))} y la debilidad ${lista(ds.map(f=>f.codigo))}. Es candidato a estrategia defensiva.`)});
+  const q=c=>C.U.filter(u=>u.cuad===c);if(C.U.length){const parts=["Estrella","Interrogante","Vaca","Perro"].map(c=>[c,q(c)]).filter(x=>x[1].length).map(([c,us])=>`${us.length} ${c.toLowerCase()}${us.length>1?(c==="Vaca"?"s":c==="Perro"?"s":"s"):""} (${us.map(u=>u.nombre).join(", ")})`);
+    add("info",`Portafolio BCG con corte de ${fmt(C.bcg.corte,1)} %: ${parts.join("; ")}.${q("Interrogante").length?" Los interrogantes exigen decidir si se invierte para ganar participación o se abandonan.":""}`)}
+  if(e.adlMadurez&&e.adlPosicion){const z=ADL_TXT[ADL_Z[e.adlPosicion][ADL_M.findIndex(x=>x[0]===e.adlMadurez)]];add("info",`ADL: sector en ${ADL_M.find(x=>x[0]===e.adlMadurez)[1].toLowerCase()} con posición ${ADL_P.find(x=>x[0]===e.adlPosicion)[1].toLowerCase()}; zona de ${z.toLowerCase()}.`)}
+  const ns=sugerenciasMEFI(C).filter(g=>!g.usado);if(ns.length)add("info",`Hay ${ns.length} factor(es) sugerido(s) desde las cifras financieras sin revisar.`);
+  const rec=C.ie&&IE_REC[C.ie.zona];
+  if(C.ie)add("acc",`Posición estratégica: celda ${C.ie.rom}, ${C.ie.zona.toLowerCase()}. La recomendación habitual para esta zona es ${rec.txt}.`);
+  return{it,next:{tab:"estrategia",t:C.ie?`En el Módulo III, formular estrategias coherentes con "${C.ie.zona.toLowerCase()}"${De[0]?`, que respondan a la debilidad ${De[0].codigo}`:""}${crit.length?` y al punto crítico en ${crit.map(c=>c[1].toLowerCase()).join(" y ")}`:""}.`:"Completa la MEFI para obtener la posición estratégica antes de formular."}}
+}
+function cobertura(C){
+  const usadosV=new Set(C.E.flatMap(s=>s.variables||[])),usadosP=new Set(C.E.flatMap(s=>s.externos||[])),usadosF=new Set(C.E.flatMap(s=>s.factores||[]));
+  const amen=C.V.filter(v=>v.tipo==="A"&&(v.riesgo||0)>=3).concat(C.P.filter(p=>p.tipo==="A"&&num(p.impacto)>=4));
+  const deb=C.F.filter(f=>f.tipo==="D");
+  return{amenSin:amen.filter(x=>!(usadosV.has(x.id)||usadosP.has(x.id))),debSin:deb.filter(f=>!usadosF.has(f.id)),amen,deb}}
+function insightsIII(C){
+  const E=C.E,it=[],add=(n,t)=>it.push({n,t});if(!E.length){add("info","Aún no hay estrategias formuladas.");return{it,next:null}}
+  const rec=C.ie&&IE_REC[C.ie.zona];
+  const tipos=[...new Set(E.map(s=>s.tipo).filter(Boolean))];add("info",`${E.length} estrategias. Por tipo: ${tipos.map(t=>`${t.toLowerCase()} ${E.filter(s=>s.tipo===t).length}`).join(" · ")}.`);
+  if(rec){const fuera=E.filter(s=>s.tipo&&!rec.tipos.includes(s.tipo));if(fuera.length)add("warn",`${lista(fuera.map(s=>s.codigo))} ${fuera.length>1?"son":"es"} de un tipo distinto al que sugiere la posición (${C.ie.zona.toLowerCase()}). No es un error, pero hay que justificarlo.`);else add("ok",`Las estrategias son coherentes con la posición ${C.ie.rom} (${C.ie.zona.toLowerCase()}).`)}
+  const cv=cobertura(C);
+  if(cv.amenSin.length)add("bad",`Amenazas prioritarias sin estrategia que las atienda: ${lista(cv.amenSin.map(x=>x.codigo+" "+(x.nombre||x.factor)))}.`);else if(cv.amen.length)add("ok","Todas las amenazas prioritarias tienen al menos una estrategia que las atiende.");
+  if(cv.debSin.length)add("warn",`Debilidades sin estrategia: ${lista(cv.debSin.map(f=>f.codigo+" "+f.factor))}.`);
+  const sinK=E.filter(s=>!s.ks.length),sinT=E.filter(s=>tacticasDe(s).some(t=>!s.ts.some(x=>x.tactica===t)));
+  if(sinK.length)add("bad",`Sin indicador que las vigile: ${lista(sinK.map(s=>s.codigo))}.`);
+  if(sinT.length)add("warn",`Con tácticas sin tareas en el plan de acción: ${lista(sinT.map(s=>s.codigo))}.`);
+  if(C.presupuesto){const top=[...E].sort((a,b)=>(num(b.presupuesto)||0)-(num(a.presupuesto)||0))[0];add("info",`Presupuesto total de ${cop(C.presupuesto)}; la estrategia con más recursos es ${top.codigo} (${fmt((num(top.presupuesto)||0)/C.presupuesto*100,0)} %).`)}
+  const ds=C.T.map(t=>t.inicio).filter(Boolean).sort(),df=C.T.map(t=>t.fin).filter(Boolean).sort();if(ds.length)add("info",`El plan de acción va de ${fDate(ds[0])} a ${fDate(df[df.length-1])}, con ${C.T.length} tareas.`);
+  const k=t=>C.K.filter(x=>x.sem===t).length;if(C.K.length)add(k("bad")?"bad":k("warn")>k("ok")?"warn":"ok",`Indicadores: ${k("ok")} en verde, ${k("warn")} en amarillo, ${k("bad")} en rojo.`);
+  const rev=E.filter(s=>s.rev);if(rev.length)add("bad",`En revisión por alarma del entorno: ${lista(rev.map(s=>s.codigo))}.`);
+  return{it,next:{tab:"sintesis",t:"La pestaña Síntesis reúne los tres módulos en una sola lectura."}}
+}
+const ICON={bad:"Atención",warn:"Vigilar",ok:"A favor",info:"Dato",acc:"Conclusión"};
+function insightCard(title,I){
+  return `<div class="card insight"><div class="eyebrow">Lectura automática</div><h2 style="margin:2px 0 10px">${esc(title)}</h2>
+  ${(()=>{const ord={acc:0,bad:1,warn:2,ok:3,info:4};const it=[...I.it].sort((a,b)=>ord[a.n]-ord[b.n]);const li=x=>`<li class="i-${x.n}"><span class="tag">${ICON[x.n]}</span><span>${esc(x.t)}</span></li>`;
+   return `<ul class="ins">${it.slice(0,4).map(li).join("")}</ul>${it.length>4?`<details class="mas"><summary>Ver ${it.length-4} hallazgo(s) más</summary><ul class="ins" style="margin-top:7px">${it.slice(4).map(li).join("")}</ul></details>`:""}`})()}
+  ${I.next?`<div class="nextstep"><span><b>Paso siguiente.</b> ${esc(I.next.t)}</span><button class="pri" data-tab="${I.next.tab}">Continuar →</button></div>`:""}</div>`}
+function sintesisDatos(C){
+  const e=S.emp;
+  const A=C.V.filter(v=>v.tipo==="A"&&v.peso!=null).sort((a,b)=>b.peso-a.peso).slice(0,3),O=C.V.filter(v=>v.tipo==="O"&&v.peso!=null).sort((a,b)=>b.peso-a.peso).slice(0,3);
+  const Fo=C.F.filter(f=>f.tipo!=="D"&&f.pond!=null).sort((a,b)=>b.pond-a.pond).slice(0,3),De=C.F.filter(f=>f.tipo==="D"&&f.p!=null).sort((a,b)=>b.p-a.p).slice(0,3);
+  const rec=C.ie&&IE_REC[C.ie.zona];const u=C.FX.ult;
+  const parr=`${e.nombre} opera en un entorno ${C.mefe!=null?`ante el cual responde ${C.mefe>=2.5?"por encima":"por debajo"} del promedio (MEFE ${fmt(C.mefe)})`:"aún sin MEFE calculada"}${A[0]?`, con ${lc1(A[0].nombre)} como principal amenaza`:""}${O[0]?` y ${lc1(O[0].nombre)} como principal oportunidad`:""}. ${u&&u.mult!=null?`En ${u.anio} creció ${fmt(u.mult,1)} veces lo que creció la economía. `:""}Internamente ${C.mefi!=null?`su posición es ${C.mefi>=2.5?"fuerte":"débil"} (MEFI ${fmt(C.mefi)})`:"aún no tiene MEFI"}${Fo[0]?`, apoyada en ${lc1(Fo[0].factor)}`:""}${De[0]?`, y su punto débil es ${lc1(De[0].factor)}`:""}. ${C.ie?`La combinación la ubica en la celda ${C.ie.rom} (${C.ie.zona.toLowerCase()}), que sugiere ${rec.txt}. `:""}${C.E.length?`El plan propone ${C.E.length} estrategias con un presupuesto de ${cop(C.presupuesto)}, ${C.T.length} tareas y ${C.K.length} indicadores de seguimiento.`:"El plan estratégico aún no está formulado."}`;
+  return{A,O,Fo,De,rec,u,parr}}
+function vSintesis(C){
+  const e=S.emp,i1=insightsI(C),i2=insightsII(C),i3=insightsIII(C),cv=cobertura(C);
+  const {A,O,Fo,De,rec,u,parr}=sintesisDatos(C);
+  const col=(t,arr,f)=>`<div><div class="eyebrow">${t}</div><ul class="plain">${arr.length?arr.map(f).join(""):'<li class="muted">—</li>'}</ul></div>`;
+  const pend=[...i1.it,...i2.it,...i3.it].filter(x=>/no suman|sin estrategia|Sin indicador|sin tareas|Pendiente de datos|sin revisar|distinto al que sugiere|Alarma roja|En revisión|Punto crítico/.test(x.t));
+  return `${headerEmp(C)}
+  ${actStrip()}<div class="card insight"><div class="eyebrow">Síntesis del diagnóstico estratégico</div><h2 style="margin:2px 0 10px">${esc(e.nombre)} en contexto</h2><p style="font-size:15px;max-width:95ch;margin:0">${esc(parr)}</p>
+   <div class="row" style="margin-top:12px"><button data-act="copySint">Copiar texto</button><span class="muted" style="font-size:12px">Sirve como punto de partida para el informe; revísalo y ajústalo con el equipo.</span></div></div>
+  <div class="tiles">
+   <div class="tile"><span class="l">MEFE · entorno</span><span class="v">${fmt(C.mefe)}</span></div><div class="tile"><span class="l">MEFI · interno</span><span class="v">${fmt(C.mefi)}</span></div>
+   <div class="tile"><span class="l">Posición</span><span class="v">${C.ie?C.ie.rom:"—"}</span><span class="s">${C.ie?esc(C.ie.zona):""}</span></div><div class="tile"><span class="l">Estrategias · tareas</span><span class="v">${C.E.length} · ${C.T.length}</span></div>
+   <div class="tile"><span class="l">Presupuesto</span><span class="v" style="font-size:20px">${cop(C.presupuesto)}</span></div><div class="tile"><span class="l">Indicadores en verde</span><span class="v">${C.K.filter(k=>k.sem==="ok").length} / ${C.K.length}</span></div></div>
+  <div class="card"><h2 style="margin-bottom:10px">La cadena completa</h2><div class="chain">
+   <div class="step"><span class="num">1</span><h3>Entorno</h3>${col("Amenazas",A,v=>`<li><span class="code">${esc(v.codigo)}</span> ${esc(v.nombre)}</li>`)}${col("Oportunidades",O,v=>`<li><span class="code">${esc(v.codigo)}</span> ${esc(v.nombre)}</li>`)}</div>
+   <div class="step"><span class="num">2</span><h3>Interno</h3>${col("Fortalezas",Fo,f=>`<li><span class="code">${esc(f.codigo)}</span> ${esc(f.factor)}</li>`)}${col("Debilidades",De,f=>`<li><span class="code">${esc(f.codigo)}</span> ${esc(f.factor)}</li>`)}</div>
+   <div class="step"><span class="num">3</span><h3>Posición</h3><p style="margin:0">${C.ie?`Celda <b>${C.ie.rom}</b>: ${esc(C.ie.zona.toLowerCase())}.<br><span class="muted">Sugiere ${esc(rec.txt)}.</span>`:"Sin calcular."}</p>${C.bcg?`<p class="muted" style="font-size:12.5px">Corte BCG: ${fmt(C.bcg.corte,1)} %.</p>`:""}</div>
+   <div class="step"><span class="num">4</span><h3>Plan</h3>${col("Estrategias",[...C.E].sort(byCode),s=>`<li><span class="code">${esc(s.codigo)}</span> ${esc(s.estrategia)} ${s.rev?'<span class="pill p-bad">En revisión</span>':""}</li>`)}</div>
+  </div></div>
+  <div class="grid2">
+   <div class="card"><h2 style="margin-bottom:8px">Cobertura del plan</h2><p class="muted" style="margin-top:0;font-size:13px">¿Las estrategias responden a lo que encontró el diagnóstico?</p>
+    <dl class="kv"><dt>Amenazas prioritarias</dt><dd>${cv.amen.length-cv.amenSin.length} de ${cv.amen.length} atendidas${cv.amenSin.length?` · faltan ${esc(cv.amenSin.map(x=>x.codigo).join(", "))}`:""}</dd><dt>Debilidades</dt><dd>${cv.deb.length-cv.debSin.length} de ${cv.deb.length} atendidas${cv.debSin.length?` · faltan ${esc(cv.debSin.map(x=>x.codigo).join(", "))}`:""}</dd></dl></div>
+   <div class="card"><h2 style="margin-bottom:8px">Antes de presentar</h2>${pend.length?`<ul class="ins">${pend.map(x=>`<li class="i-${x.n}"><span class="tag">${ICON[x.n]}</span><span>${esc(x.t)}</span></li>`).join("")}</ul>`:'<p class="muted">Sin pendientes críticos.</p>'}</div>
+  </div>`}
+
+/* ---------- Entradas: lo que se llena a mano, en orden ---------- */
+function pasos(C){
+  const e=S.emp,V=C.V.filter(v=>(v.serie||[]).length),R=C.FX.rows,E=C.E,K=C.K,F=C.F;
+  const st=(ok,part)=>ok?"ok":part?"part":"pend";
+  const finOk=R.length>=3&&R.every(r=>FIN_CAMPOS.every(([k])=>num(r[k])!=null)&&r.cuadre!=null&&r.cuadre<=.01);
+  const finPart=R.some(r=>FIN_CAMPOS.some(([k])=>num(r[k])!=null));
+  const dol=["importa","exporta","deudaUSD"].filter(k=>e[k]==="si"||e[k]==="no").length;
+  const ver=V.filter(v=>v.verificacion==="verificado").length;
+  const cal=V.filter(v=>num(v.calificacion)!=null).length;
+  const sug=sugerenciasMEFI(C),sugP=sug.filter(g=>!g.usado).length;
+  const okP=F.length>0&&Math.abs(C.sumPesoF-1)<=.001,calF=F.filter(f=>f.c!=null).length;
+  const Ucnt=C.U.filter(u=>u.cuad).length;
+  const eOk=s=>s.objetivo&&tacticasDe(s).length&&num(s.presupuesto)!=null&&s.inicio&&s.fin&&(s.vs.length||s.ps.length)&&s.fs.length;
+  const kOk=k=>k.numerador&&k.denominador&&num(k.lineaBase)!=null&&num(k.meta)!=null;
+  const tacs=E.reduce((a,s)=>a+tacticasDe(s).length,0),tacCub=E.reduce((a,s)=>a+tacticasDe(s).filter(t=>s.ts.some(x=>x.tactica===t&&x.completa)).length,0);
+  return [
+   {n:1,a:"Macroeconomía",t:"Datos de la empresa",d:"Nombre, sector y tipo de empresa (comercial o aseguradora). El tipo cambia cómo se lee la tasa de interés.",s:st(e.nombre&&e.sector&&e.tipoEmpresa,e.nombre),x:e.tipoEmpresa?(e.tipoEmpresa==="aseguradora"?"Aseguradora":"Comercial"):"Falta el tipo",b:[["editEmp","Abrir"]]},
+   {n:2,a:"Macroeconomía",t:"Estados financieros de 3 años",d:"Seis cifras por año: ingresos, egresos, utilidad neta, activos, pasivos y patrimonio, con la fuente (informe y página).",s:st(finOk&&!R.some(r=>r.verificacion==="ilustrativo"),finPart),x:`${R.length} año(s)${R.some(r=>r.cuadre!=null&&r.cuadre>.01)?" · no cuadra activo = pasivo + patrimonio":""}${R.some(r=>r.verificacion==="ilustrativo")?" · cifras ilustrativas":""}`,b:[["editFin","Cargar cifras"]]},
+   {n:3,a:"Macroeconomía",t:"Exposición al dólar",d:"Tres preguntas de sí o no: ¿importa?, ¿vende en el exterior?, ¿tiene deuda en dólares? Con el sustento del informe.",s:st(dol===3&&e.dolarNota,dol>0),x:`${dol} de 3 respondidas`,b:[["editEmp","Responder"]]},
+   {n:4,a:"Macroeconomía",t:"Verificar las series macro",d:"Las series vienen cargadas. Contrasta cada una con DANE o el Banco de la República y cambia su estado a 'Fuente oficial verificada'.",s:st(V.length&&ver===V.length,ver>0),x:`${ver} de ${V.length} verificadas`,b:[["tab:entorno","Ir a las variables"]]},
+   {n:5,a:"Macroeconomía",t:"Calificar la MEFE",d:"Para cada variable, ¿qué tan bien responde la empresa? 1 deficiente, 2 promedio, 3 superior al promedio, 4 superior. El peso lo calcula la app.",s:st(V.length&&cal===V.length,cal>0),x:`${cal} de ${V.length} calificadas`,dep:finOk?null:2,b:[["tab:entorno","Ir a la MEFE"]]},
+   {n:6,a:"Macroeconomía",t:"Factores PESTEL",d:"Al menos cinco factores del entorno sin serie numérica (políticos, sociales, tecnológicos, ambientales, legales), con su fuente.",s:st(C.P.length>=5,C.P.length>0),x:`${C.P.length} factor(es)`,b:[["new:pestel","Agregar factor"],["tab:entorno","Ver"]]},
+   {n:7,a:"Planeación Estratégica",t:"Fortalezas y debilidades (MEFI)",d:"Revisa los factores sugeridos desde las cifras, agrega los propios y asigna peso (que sume 1,00) y calificación de 1 a 4.",s:st(F.length>=6&&okP&&calF===F.length&&!sugP,F.length>0),x:`${F.length} factor(es) · pesos suman ${fmt(C.sumPesoF)}${sugP?` · ${sugP} sugerido(s) sin revisar`:""}`,dep:finOk?null:2,b:[["tab:interno","Ir a la MEFI"]]},
+   {n:8,a:"Planeación Estratégica",t:"Unidades de negocio (BCG)",d:"Para cada línea de negocio: crecimiento de su mercado (%), participación frente al líder y tamaño relativo.",s:st(Ucnt>=2,C.U.length>0),x:`${C.U.length} unidad(es)`,b:[["new:unidades","Agregar unidad"],["tab:interno","Ver"]]},
+   {n:9,a:"Planeación Estratégica",t:"Matriz ADL",d:"Madurez del sector y posición competitiva de la empresa.",s:st(e.adlMadurez&&e.adlPosicion,e.adlMadurez||e.adlPosicion),x:e.adlMadurez&&e.adlPosicion?"Definida":"Sin definir",b:[["editEmp","Definir"]]},
+   {n:10,a:"Planeación Estratégica",t:"Conclusiones del diagnóstico",d:"Tres o cuatro ideas que resumen el diagnóstico interno y externo. La lectura automática del Módulo II sirve de punto de partida.",s:st(e.conclusiones&&e.conclusiones.length>40&&!/^Ejemplo/.test(e.conclusiones),e.conclusiones),x:e.conclusiones&&/^Ejemplo/.test(e.conclusiones)?"Texto de ejemplo":"",b:[["editEmp","Escribir"]]},
+   {n:11,a:"Gerencia Estratégica",t:"Estrategias",d:"Al menos tres, cada una con objetivo, tácticas (una por línea), presupuesto, fechas y de qué variable del entorno y qué factor interno nace.",s:st(E.length>=3&&E.every(eOk),E.length>0),x:`${E.filter(eOk).length} de ${E.length} completas`,dep:(cal===V.length&&V.length&&okP)?null:(cal===V.length&&V.length?7:5),b:[["new:estrategias","Agregar estrategia"],["tab:estrategia","Ver"]]},
+   {n:12,a:"Gerencia Estratégica",t:"Indicadores",d:"Cada estrategia con al menos un indicador: numerador, denominador, línea base y meta.",s:st(E.length&&E.every(s=>s.ks.some(kOk)),K.length>0),x:`${E.filter(s=>s.ks.some(kOk)).length} de ${E.length} estrategias con indicador`,dep:E.length?null:11,b:[["new:kpis","Agregar indicador"],["tab:estrategia","Ver"]]},
+   {n:13,a:"Gerencia Estratégica",t:"Plan de acción",d:"Para cada táctica, las tareas con fecha de inicio, fecha de cierre, responsable y recursos.",s:st(tacs&&tacCub===tacs,C.T.length>0),x:`${tacCub} de ${tacs} tácticas con tareas completas`,dep:E.length?null:11,b:[["tab:estrategia","Ir al plan"]]}
+  ]}
+const ST_PILL={ok:'<span class="pill p-ok">Completo</span>',part:'<span class="pill p-warn">En progreso</span>',pend:'<span class="pill p-line">Pendiente</span>'};
+const ASIG=[["Macroeconomía","Módulo I","entorno"],["Planeación Estratégica","Módulo II","interno"],["Gerencia Estratégica","Módulo III","estrategia"]];
+function btnPaso([act,l],pri){const [k,v]=act.split(":");const cls=pri?' class="pri"':"";
+  return k==="tab"?`<button${cls} data-tab="${v}">${l}</button>`:k==="new"?`<button${cls} data-new="${v}">${l}</button>`:`<button${cls} data-act="${act}">${l}</button>`}
+function vEntradas(C){
+  const P=pasos(C),ok=P.filter(p=>p.s==="ok").length,pct=Math.round(ok/P.length*100);
+  return `${headerEmp(C)}
+  <div class="card insight"><div class="eyebrow">Por dónde empezar</div><h2 style="margin:2px 0 6px">Entradas: lo que el equipo llena a mano</h2>
+   <p style="margin:0 0 10px;max-width:90ch">Son 13 pasos en orden. Todo lo demás (semáforos, exposición, pesos, matrices, posición estratégica, alertas y síntesis) lo calcula la app a partir de estas entradas.</p>
+   <div class="row" style="gap:10px"><div style="flex:1;min-width:180px;height:8px;border-radius:5px;background:var(--sunk);border:1px solid var(--line);overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent)"></div></div><b>${ok} de ${P.length} pasos completos</b></div></div>
+  ${ASIG.map(([a,m,tab])=>{const ps=P.filter(p=>p.a===a),k=ps.filter(p=>p.s==="ok").length;
+   return `<div class="card"><div class="cardhead"><div><div class="eyebrow">${m}</div><h2>${a}</h2></div><span class="pill ${k===ps.length?"p-ok":k?"p-warn":"p-line"}">${k} de ${ps.length} completos</span></div>
+   <ol class="steps">${ps.map(p=>`<li class="${p.s}"><span class="sn">${p.n}</span><div class="sb"><div class="row" style="gap:8px"><b>${esc(p.t)}</b>${ST_PILL[p.s]}${p.dep&&p.s!=="ok"?`<span class="pill p-line">Primero completa el paso ${p.dep}</span>`:""}</div><div class="muted" style="font-size:13px">${esc(p.d)}</div>${p.x?`<div class="mono" style="font-size:12px;margin-top:2px">${esc(p.x)}</div>`:""}</div><div class="sa">${p.b.map((b,i)=>btnPaso(b,i===0&&p.s!=="ok")).join("")}</div></li>`).join("")}</ol>
+   <div style="margin-top:8px"><button class="ghost" data-tab="${tab}">Ver resultados del ${m} →</button></div></div>`}).join("")}`}
+function franja(C,a){const ps=pasos(C).filter(p=>p.a===a),k=ps.filter(p=>p.s==="ok").length;
+  return `<div class="franja"><span>Entradas de ${esc(a)}: <b>${k} de ${ps.length}</b> completas${k<ps.length?` · siguiente: paso ${ps.find(p=>p.s!=="ok").n}, ${esc(ps.find(p=>p.s!=="ok").t.toLowerCase())}`:""}</span><button class="ghost" data-tab="entradas">Ver pasos →</button></div>`}
+
+/* ---------- Versión liviana: pasos, tareas guiadas, esencial y glosario ---------- */
+const FLOW=[["entorno","Entorno","Macroeconomía"],["interno","Empresa por dentro","Planeación Estratégica"],["estrategia","Plan","Gerencia Estratégica"],["sintesis","Resultado","Diagnóstico integrado"]];
+const ASIG_TAB={"Macroeconomía":"entorno","Planeación Estratégica":"interno","Gerencia Estratégica":"estrategia"};
+const GLOS={
+ semaforo:["Semáforo de volatilidad","Compara el último movimiento de cada variable con lo que normalmente se mueve. Verde: normal. Amarillo: más de lo usual (entre una y dos veces). Rojo: más del doble de lo usual; ahí la app pone en revisión las decisiones ligadas a esa variable."],
+ exposicion:["Exposición","Qué tanto le afecta a la empresa que una variable se mueva. Se calcula con sus propias cifras: si crece más o menos que la economía, si sus costos suben más que sus ventas, qué tan endeudada está y si maneja dólares."],
+ riesgo:["Mapa de riesgo","Cruza qué tanto le afecta cada variable a la empresa (exposición) con qué tan agitada está esa variable (volatilidad). Arriba a la derecha, en rojo, quedan las amenazas prioritarias."],
+ mefe:["MEFE","Matriz de Evaluación de Factores Externos. Cada factor del entorno tiene un peso, que calcula la app, y una calificación de 1 a 4 que pone el equipo según qué tan bien responde la empresa. El total va de 1 a 4 y 2,5 es el promedio."],
+ mefi:["MEFI","Matriz de Evaluación de Factores Internos. Lista fortalezas y debilidades, cada una con un peso (todos deben sumar 1,00) y una calificación: 1 debilidad mayor, 2 debilidad menor, 3 fortaleza menor, 4 fortaleza mayor. El total va de 1 a 4 y 2,5 es el promedio."],
+ bcg:["Matriz BCG","Clasifica las líneas de negocio según cuánto crece su mercado y qué tan grande es la empresa frente al líder: estrella (crece y lidera), interrogante (crece pero no lidera), vaca (lidera en un mercado lento) o perro (ni crece ni lidera)."],
+ adl:["Matriz ADL","Cruza la madurez del sector, de embrionario a envejecido, con la posición competitiva de la empresa, de dominante a débil, para orientar el tipo de estrategia."],
+ ie:["Matriz interna-externa","Combina el total de la MEFE (entorno) y el de la MEFI (interno) en una de nueve celdas. Cada zona sugiere un tipo de estrategia: crecer y construir, conservar y mantener, o cosechar y desinvertir."],
+ cumplimiento:["Cumplimiento de un indicador","Cumplimiento = (valor medido − línea base) ÷ (meta − línea base). Rojo de 0 % a 59 %, amarillo de 60 % a 95 %, verde por encima de 95 %."],
+ trazabilidad:["Trazabilidad","Cada decisión queda amarrada a la variable del entorno y al factor interno que la originaron, y al indicador que la vigila. Si el entorno se mueve, la app sabe qué decisiones revisar."],
+ proyeccion:["Proyecciones","Lo que esperan el FMI, el Banco Mundial, la OCDE, el Banco de la República y los analistas para el cierre del año. Sirven para anticipar si el próximo movimiento será favorable o no."]};
+const qm=k=>`<button type="button" class="qm" data-glos="${k}" aria-label="Qué significa ${esc(GLOS[k][0])}">?</button>`;
+function abrirGlos(k){const g=GLOS[k];if(!g)return;M={kind:"glos"};
+  $("#modal").innerHTML=`<div class="dlg" style="width:min(460px,100%)"><div class="row"><h2>${esc(g[0])}</h2><div class="spacer"></div><button type="button" class="ghost" data-act="close">Cerrar</button></div><p style="margin:0;font-size:14.5px;line-height:1.55">${esc(g[1])}</p></div>`;$("#modal").hidden=false}
+function tareaCard(C,a){
+  const ps=pasos(C).filter(p=>p.a===a);const sel=S.pasoSel&&S.pasoSel[a];let cur=ps.find(p=>p.n===sel)||ps.find(p=>p.s!=="ok");
+  const k=ps.filter(p=>p.s==="ok").length;
+  const dots=`<div class="dots">${ps.map(p=>`<button type="button" class="dot2 ${p.s} ${cur&&p.n===cur.n?"cur":""}" data-paso="${p.n}" data-asig="${esc(a)}" title="${esc(p.t)}">${p.n}</button>`).join("")}<span class="muted" style="font-size:12px">${k} de ${ps.length} listas</span></div>`;
+  if(!cur)return `<div class="card tarea done"><div class="eyebrow">${esc(a)} · tus entradas</div>${dots}<h2 style="margin:6px 0 4px">Listo: todas las entradas de ${esc(a)} están completas</h2><p class="muted" style="margin:0">Revisa la lectura automática y, si quieres, abre el detalle completo.</p></div>`;
+  const i=ps.indexOf(cur),prev=ps[i-1],next=ps[i+1];
+  return `<div class="card tarea"><div class="eyebrow">${esc(a)} · tu tarea ahora</div>${dots}
+   <div class="row" style="gap:8px;margin-top:8px"><h2 style="margin:0">${cur.n}. ${esc(cur.t)}</h2>${ST_PILL[cur.s]}</div>
+   <p style="margin:6px 0 0;max-width:80ch">${esc(cur.d)}</p>${cur.x?`<div class="mono muted" style="font-size:12px;margin-top:4px">${esc(cur.x)}</div>`:""}
+   ${cur.dep&&cur.s!=="ok"?`<div class="banner" style="margin-top:8px">Este paso usa resultados del paso ${cur.dep}. Puedes avanzar, pero conviene completarlo primero.</div>`:""}
+   <div class="row" style="margin-top:12px">${cur.b.map((b,j)=>btnPaso(b,j===0)).join("")}<div class="spacer"></div>
+    ${prev?`<button class="ghost" data-paso="${prev.n}" data-asig="${esc(a)}">← Paso ${prev.n}</button>`:""}${next?`<button class="ghost" data-paso="${next.n}" data-asig="${esc(a)}">Paso ${next.n} →</button>`:""}</div></div>`}
+function semaforoCompacto(C){
+  const V=[...C.V].filter(v=>(v.serie||[]).length).sort(byCode);if(!V.length)return "";
+  return `<div class="card"><div class="cardhead"><div><h2>Semáforo del entorno ${qm("semaforo")}</h2><p>Cómo se movió cada variable en el último periodo y si eso le conviene a ${esc(S.emp.nombre)}.</p></div></div>
+   <div class="semgrid">${V.map(v=>{const m=v.movEf,ef=m?(Math.sign(m)*v.ef>0?"fav":"desf"):null;return `<button class="semit" data-edit="variables" data-id="${esc(v.id)}"><span class="sdot n${v.vol?v.vol.nivel:0}"></span><span class="sname">${esc(v.nombre)}</span><span class="sval">${v.ultimo?fmtV(v,v.ultimo.v):"—"}${m!=null?` <small>${m>0?"▲":m<0?"▼":"■"} ${fmt(Math.abs(m),2)} ${unidadMov(v)}</small>`:""}</span><span class="sef ${ef||""}">${ef==="fav"?"Le favorece":ef==="desf"?"Le perjudica":"Sin cambio"}</span>${v.reciente&&v.reciente.corto?`<span class="sproy rec${v.reciente.alerta?" al":""}">Reciente: ${esc(v.reciente.corto)}</span>`:""}${v.pr.prox!=null?`<span class="sproy">Se espera ${fmtV(v,v.pr.prox)} al cierre ${v.pr.anio}</span>`:""}</button>`}).join("")}</div></div>`}
+function esencialI(C){return `${semaforoCompacto(C)}<div class="card"><div class="cardhead"><div><h2>Mapa de riesgo ${qm("riesgo")}</h2><p>Qué tanto le afecta cada variable frente a qué tan agitada está.</p></div></div>${heatSVG(C)}</div>`}
+function esencialII(C){const e=S.emp;return `<div class="card"><div class="cardhead"><div><h2>Posición estratégica ${qm("ie")}</h2><p>${C.ie?`Con MEFE ${fmt(C.mefe)} y MEFI ${fmt(C.mefi)}, ${esc(e.nombre)} queda en la celda <b>${C.ie.rom}</b>: <b>${esc(C.ie.zona.toLowerCase())}</b>.`:"Aparece cuando estén la MEFE y la MEFI."}</p></div><button class="ghost" data-tab="estrategia">Ir al Plan →</button></div>${ieSVG(C.ie,C.mefe,C.mefi)}</div>`}
+function esencialIII(C){const E=[...C.E].sort(byCode);if(!E.length)return "";
+  return `<div class="card"><div class="cardhead"><div><h2>Estrategias formuladas ${qm("trazabilidad")}</h2><p>Cada una con su origen, sus tareas y sus indicadores. Toca una para editarla.</p></div></div>
+  <div class="slist">${E.map(s=>`<button class="sitem ${s.rev?"rev":""}" data-edit="estrategias" data-id="${esc(s.id)}"><span class="code">${esc(s.codigo)}</span><span class="stit">${esc(s.estrategia)}<small>${esc(s.objetivo||"")}</small></span><span class="smeta">${s.rev?'<span class="pill p-bad">En revisión</span>':'<span class="pill p-ok">Vigente</span>'}<span class="muted">${s.ts.length} tareas · ${s.ks.length} indicador(es)</span><span>${s.ks.map(k=>`<span class="kdot ${k.sem}" title="${esc(k.codigo+" "+k.nombre)}"></span>`).join("")}</span></span></button>`).join("")}</div></div>`}
+function vBienvenida(){
+  return `<div class="card insight welcome"><div class="eyebrow">Bienvenida</div><h1 style="margin:4px 0 6px">¿De qué asignatura eres?</h1>
+   <p style="margin:0 0 14px;max-width:70ch">La app te lleva directo a tu parte del diagnóstico. Puedes cambiar después desde el menú.</p>
+   <div class="wgrid">${FLOW.slice(0,3).map(([t,l,a],i)=>`<button class="wbtn" data-asig-pick="${esc(a)}"><span class="num">${i+1}</span><b>${esc(a)}</b><span>${esc(l)}: ${["variables macro, estados financieros y riesgo del entorno","fortalezas, debilidades, portafolio y posición estratégica","estrategias, plan de acción e indicadores"][i]}</span></button>`).join("")}</div>
+   <div class="row" style="margin-top:12px"><button class="ghost" data-asig-pick="__ver">Solo quiero ver el resultado →</button><button class="ghost" data-act="verGuia">¿Cómo funciona la app?</button></div></div>`}
+function abrirMenu(){M={kind:"menu"};const it=(attr,t,d)=>`<button ${attr}><b>${t}</b><span>${d}</span></button>`;
+  $("#modal").innerHTML=`<div class="dlg" style="width:min(520px,100%)"><div class="row"><h2>Menú</h2><div class="spacer"></div><button type="button" class="ghost" data-act="close">Cerrar</button></div>
+  <div class="explist" style="margin-bottom:6px">${it('data-menu="tab:guia"',"Cómo funciona la app","Instrucciones generales: qué hace cada curso y cómo trabajar.")}</div>
+  <div class="eyebrow">Empresa</div><div class="explist">${it('data-menu="editEmp"',"Datos de la empresa","Nombre, sector, tipo, preguntas sobre dólares, ADL y conclusiones.")}${S.canWrite?it('data-menu="newEmp"',"Nueva empresa","Agregar otra empresa para analizar."):""}</div>
+  <div class="eyebrow" style="margin-top:6px">Archivos</div><div class="explist">${S.dl?it('data-menu="exportar"',"Exportar","Informe en PDF, plan de acción, trazabilidad o respaldo."):""}${it('data-menu="copias"',"Copias guardadas","Guardar o restaurar un avance.")}</div>
+  <div class="eyebrow" style="margin-top:6px">Para docentes y comité</div><div class="explist">${it('data-menu="tab:entradas"',"Lista completa de entradas","Los 13 pasos de las tres asignaturas y su avance.")}${it('data-menu="tab:proyecto"',"Objetivos del proyecto","Avance de cada objetivo específico.")}${it('data-menu="tab:tablero"',"Tablero","Indicadores clave en una pantalla.")}${it('data-menu="tab:traza"',"Mapa de decisiones","Trazabilidad completa y simulador de choques.")}${it('data-menu="tab:metodo"',"Método","Fórmulas y reglas de cálculo.")}</div>
+  <div class="explist" style="margin-top:6px">${it('data-menu="asig"',"Cambiar mi asignatura","Volver a la pantalla de bienvenida.")}</div></div>`;$("#modal").hidden=false}
+
+/* ---------- Cómo funciona (instrucciones generales) ---------- */
+function vGuia(){
+  const pasoTxt=[["Entorno","Macroeconomía","cargas las cifras de la empresa (6 por año, 3 años), respondes 3 preguntas sobre dólares, verificas las series macro y calificas la MEFE.","Semáforo de cada variable, qué tanto le afecta a la empresa, mapa de riesgo y pesos de la MEFE."],
+   ["Empresa por dentro","Planeación Estratégica","revisas las fortalezas y debilidades sugeridas, agregas las propias con peso y calificación, cargas las unidades de negocio y defines la ADL.","Total de la MEFI, cuadrantes de la BCG y posición estratégica (matriz interna-externa)."],
+   ["Plan","Gerencia Estratégica","formulas las estrategias (de qué variable y qué factor nacen), sus tácticas, las tareas del plan de acción y los indicadores.","Coherencia con la posición, cobertura de amenazas y debilidades, semáforo de indicadores y alertas."],
+   ["Resultado","Todos","nada; este paso se arma solo.","Diagnóstico integrado en un párrafo, la cadena completa y la lista de pendientes. Se exporta a PDF."]];
+  return `<div class="card insight guia"><div class="eyebrow">Antes de empezar · 2 minutos</div><h1 style="margin:4px 0 8px">Cómo funciona Strategy App</h1>
+   <p style="margin:0;font-size:15px;max-width:80ch">Es una herramienta para hacer el <b>diagnóstico estratégico</b> de una empresa, desde el entorno económico hasta el plan de acción. Su diferencia con una plantilla de matrices es que <b>cada decisión queda conectada</b> con el dato que la originó: si el entorno cambia, la app sabe qué estrategias revisar.</p></div>
+  <div class="card"><h2 style="margin-bottom:4px">Quién hace qué</h2><p class="muted" style="margin:0 0 12px;font-size:13px">Los tres cursos trabajan sobre la misma empresa y la app une sus partes. Cada paso usa lo que dejó el anterior.</p>
+   <div class="gflow">${pasoTxt.map(([t,a,hace,app],i)=>`<div class="gstep"><span class="num">${i+1}</span><h3>${t}</h3><div class="eyebrow">${a}</div><p><b>Tú llenas:</b> ${hace}</p><p class="muted"><b>La app calcula:</b> ${app}</p></div>`).join('<span class="garrow" aria-hidden="true">→</span>')}</div></div>
+  <div class="grid2">
+   <div class="card"><h2 style="margin-bottom:8px">Cómo trabajar en cada paso</h2><ol class="gol">
+    <li><b>Mira "Tu tarea ahora".</b> Arriba de cada paso está la tarea que sigue, con un botón para hacerla.</li>
+    <li><b>Sigue los círculos.</b> Verde: lista. Amarillo: en progreso. Blanco: pendiente. Puedes tocar cualquier círculo para ir a esa tarea.</li>
+    <li><b>Lee la lectura automática.</b> Te dice qué encontró la app con tus datos y qué pasa al siguiente paso.</li>
+    <li><b>Abre "Ver detalle completo"</b> cuando necesites las matrices y tablas enteras.</li>
+    <li><b>¿Un término no es claro?</b> Toca el botón <span class="qm" style="pointer-events:none">?</span> que está a su lado.</li></ol></div>
+   <div class="card"><h2 style="margin-bottom:8px">Reglas de trabajo</h2><ol class="gol">
+    <li><b>Toda cifra lleva su fuente:</b> informe, página y fecha de consulta. Solo información pública.</li>
+    <li><b>Reemplaza los datos de prueba.</b> Lo que diga "ilustrativo" o "por verificar" se cambia por la cifra real.</li>
+    <li><b>No borres lo que cargó otro equipo.</b> Si ves un error, avísale al equipo o al docente.</li>
+    <li><b>Guarda una copia antes de cada entrega</b> desde Menú → Copias guardadas.</li>
+    <li><b>Es un ejercicio académico:</b> no es asesoría ni recomendación de inversión.</li></ol></div>
+  </div>
+  <div class="card guiago"><div><h2 style="margin:0">¿Listo?</h2><p class="muted" style="margin:2px 0 0">Elige tu asignatura y la app te lleva a tu primera tarea. Esta guía queda siempre en Menú → Cómo funciona.</p></div><button class="pri" data-act="guiaOk" style="font-size:15px;padding:10px 20px">Empezar →</button></div>`}
+
+/* ---------- Trabajo en línea: actividad reciente y "editado por" ---------- */
+const KIND_TXT={variables:"la variable",pestel:"el factor PESTEL",internos:"el factor interno",unidades:"la unidad de negocio",estrategias:"la estrategia",kpis:"el indicador",tareas:"la tarea",empresa:"los datos de la empresa",financieros:"los estados financieros",copia:"una copia"};
+const KIND_ASIG={variables:"Macroeconomía",pestel:"Macroeconomía",financieros:"Macroeconomía",internos:"Planeación Estratégica",unidades:"Planeación Estratégica",estrategias:"Gerencia Estratégica",kpis:"Gerencia Estratégica",tareas:"Gerencia Estratégica"};
+function hace(iso){const d=(Date.now()-new Date(iso).getTime())/1000;if(!isFinite(d))return"";if(d<60)return"hace un momento";if(d<3600)return`hace ${Math.round(d/60)} min`;if(d<86400)return`hace ${Math.round(d/3600)} h`;if(d<172800)return"ayer";return new Date(iso).toLocaleDateString("es-CO",{day:"numeric",month:"short"})}
+const quien=id=>{if(!id)return"Alguien";if(id===S.uid)return"Tú";const n=S.names&&S.names[id];return n||"Un integrante"};
+function logAct(accion,kind,codigo,texto){
+  if(!S.db||!S.eid)return;
+  const doc={quien:S.uid||null,asig:S.asig||"",cuando:new Date().toISOString(),accion,kind,codigo:codigo||"",texto:String(texto||"").slice(0,90)};
+  S.db.collection(`empresas/${S.eid}/actividad`).doc().set(doc).catch(()=>{});
+  if(Math.random()<.1)podarAct()}
+async function podarAct(){try{const q=await S.db.collection(`empresas/${S.eid}/actividad`).orderBy("cuando","desc").get();for(const d of q.docs.slice(150))await S.db.doc(`empresas/${S.eid}/actividad/${d.id}`).delete()}catch(e){}}
+async function resolverNombres(ids){if(!S.user)return;const falta=ids.filter(i=>i&&i!==S.uid&&!(S.names&&i in S.names));if(!falta.length)return;
+  try{const ps=await S.user.profiles(falta);S.names=S.names||{};falta.forEach(i=>S.names[i]=(ps&&ps[i]&&ps[i].name)||"");schedule()}catch(e){}}
+function actItem(a){const asig=a.asig?` <span class="muted">(${esc(a.asig)})</span>`:"";return `<li><b>${esc(quien(a.quien))}</b>${asig} ${esc(a.accion)} ${esc(KIND_TXT[a.kind]||"")} ${a.codigo?`<span class="code">${esc(a.codigo)}</span>`:""}${a.texto?` <span class="muted">· ${esc(a.texto)}</span>`:""} <span class="ago">${esc(hace(a.cuando))}</span></li>`}
+function actStrip(){const A=S.act||[];if(!A.length)return `<div class="actstrip muted">Aún no hay actividad registrada en esta empresa. Cuando alguien guarde algo, aparecerá aquí.</div>`;
+  return `<div class="actstrip"><div class="row" style="gap:8px"><span class="live"></span><b>Lo último que se hizo</b><span class="muted" style="font-size:12px">· se actualiza en vivo</span></div><ul class="actl">${A.slice(0,3).map(actItem).join("")}</ul>${A.length>3?`<details class="mas"><summary>Ver ${A.length-3} cambio(s) más</summary><ul class="actl">${A.slice(3).map(actItem).join("")}</ul></details>`:""}</div>`}
+
+/* ---------- vistas ---------- */
+function headerEmp(C){const e=S.emp;return `<div class="row"><div><div class="eyebrow">${esc(e.sector||"Sector sin definir")}</div><h1>${esc(e.nombre)}</h1>${e.razon?`<div class="muted">${esc(e.razon)}</div>`:""}${e.corteDatos?`<div class="muted" style="font-size:12px">Corte de datos macro: <b>${esc(e.corteDatos)}</b></div>`:""}</div><div class="spacer"></div>${e.ilustrativo?'<span class="pill p-warn">Contiene datos ilustrativos</span>':""}</div>
+${e.ilustrativo?`<details class="aviso"><summary><b>Ejercicio académico de aula.</b> No es asesoría ni recomendación de inversión. Algunos datos son de prueba. <u>Ver más</u></summary><p>No compromete a la Universidad ni a la empresa. ${esc(e.notaDatos||"Las series marcadas como ilustrativas deben reemplazarse por las cifras de fuente oficial antes de reportar resultados.")}</p></details>`:`<div class="muted" style="font-size:12px">Ejercicio académico de aula: no constituye asesoría ni recomendación de inversión.</div>`}`}
+
+function vTablero(C){
+  const alertas=C.V.filter(v=>v.alerta).length,rev=C.E.filter(s=>s.rev).length;
+  const cnt=t=>C.K.filter(k=>k.sem===t).length;
+  return `${headerEmp(C)}
+  <div class="tiles">
+   <div class="tile"><span class="l">MEFE · factores externos</span><span class="v">${fmt(C.mefe)}</span><span class="s muted">Escala 1–4 · promedio 2,5</span></div>
+   <div class="tile"><span class="l">MEFI · factores internos</span><span class="v">${fmt(C.mefi)}</span><span class="s ${Math.abs(C.sumPesoF-1)>.001&&C.F.length?"":"muted"}" style="${Math.abs(C.sumPesoF-1)>.001&&C.F.length?"color:var(--bad)":""}">Pesos suman ${fmt(C.sumPesoF)}</span></div>
+   <div class="tile"><span class="l">Matriz interna-externa</span><span class="v">${C.ie?C.ie.rom:"—"}</span><span class="s">${C.ie?esc(C.ie.zona):"Faltan MEFE o MEFI"}</span></div>
+   <div class="tile"><span class="l">Variables en alerta</span><span class="v" style="color:${alertas?"var(--bad)":"var(--ok)"}">${alertas}</span><span class="s muted">de ${C.V.length} vigiladas</span></div>
+   <div class="tile"><span class="l">Decisiones en revisión</span><span class="v" style="color:${rev?"var(--bad)":"var(--ok)"}">${rev}</span><span class="s muted">de ${C.E.length} estrategias</span></div>
+   <div class="tile"><span class="l">Presupuesto del plan</span><span class="v" style="font-size:20px">${cop(C.presupuesto)}</span><span class="s muted">COP · suma de estrategias</span></div>
+  </div>
+  <div class="grid2">
+   <div class="card"><div class="cardhead"><div><h2>Posición estratégica</h2><p>Cruce de los totales ponderados MEFE y MEFI.</p></div></div>${ieSVG(C.ie,C.mefe,C.mefi)}</div>
+   <div class="card"><div class="cardhead"><div><h2>Mapa de riesgo macro</h2><p>Exposición de la empresa frente a la volatilidad de cada variable. Rojo: amenaza prioritaria.</p></div><button class="ghost" data-tab="entorno">Ver Módulo I →</button></div>${heatSVG(C)}</div>
+  </div>
+  <div class="grid2">
+   <div class="card"><div class="cardhead"><div><h2>Portafolio · BCG</h2><p>Unidades de negocio por crecimiento y participación relativa.</p></div></div>${C.U.length?bcgSVG(C.U,C.bcg.corte):'<div class="empty">Sin unidades de negocio cargadas en el Módulo II.</div>'}</div>
+   <div class="card"><div class="cardhead"><div><h2>Indicadores del plan</h2><p>${cnt("ok")} en verde · ${cnt("warn")} en amarillo · ${cnt("bad")} en rojo</p></div></div>${kpiTable(C,true)}</div>
+  </div>`}
+
+function kpiTable(C,compact){
+  const K=[...C.K].sort(byCode);if(!K.length)return '<div class="empty">Sin indicadores. Créalos en el Módulo III.</div>';
+  return `${semLegend}<div class="tbl"><table><thead><tr><th>Código</th><th>Indicador</th>${compact?"":"<th>Fórmula</th><th>Estrategia</th>"}<th class="n">Base</th><th class="n">Meta</th><th class="n">Valor medido</th><th class="n">Cumplimiento</th><th>Semáforo</th></tr></thead><tbody>
+  ${K.map(k=>`<tr class="click" data-edit="kpis" data-id="${esc(k.id)}"><td class="code">${esc(k.codigo)}</td><td>${esc(k.nombre)}<div class="muted" style="font-size:12px">${esc(k.unidad||"")}${k.frecuencia?" · "+esc(k.frecuencia):""}</div></td>
+  ${compact?"":`<td style="font-size:12.5px">${esc(k.numerador||"—")}<div class="muted">÷ ${esc(k.denominador||"—")}</div></td><td class="code">${esc(k.est?.codigo||"—")}</td>`}
+  <td class="n">${fmt(num(k.lineaBase),1)}</td><td class="n">${fmt(num(k.meta),1)}</td><td class="n">${fmt(num(k.actual),1)}</td><td class="n">${k.prog==null?"—":fmt(k.prog*100,0)+"%"}</td>
+  <td><div class="chips">${semPill[k.sem]}${k.rev?'<span class="pill p-bad">En revisión</span>':""}</div></td></tr>`).join("")}</tbody></table></div>`}
+
+const fmtV=(v,x)=>x==null?"—":fmt(x,Math.abs(x)>=1000?0:2);
+const nivelPill=n=>n===3?'<span class="pill p-bad"><span class="dot"></span>Rojo · muy inusual</span>':n===2?'<span class="pill p-warn"><span class="dot"></span>Amarillo · inusual</span>':n===1?'<span class="pill p-ok"><span class="dot"></span>Verde · normal</span>':'<span class="pill p-line">Sin datos</span>';
+const riesgoPill=r=>r==null?'<span class="pill p-line">Sin datos</span>':r>=6?'<span class="pill p-bad">Prioritaria</span>':r>=3?'<span class="pill p-warn">Vigilar</span>':'<span class="pill p-ok">Baja</span>';
+const efPill=x=>x==="fav"?'<span class="pill p-ok">Favorable</span>':x==="desf"?'<span class="pill p-bad">Desfavorable</span>':'<span class="pill p-line">—</span>';
+function frase(v){
+  if(!v.vol)return "Faltan datos: se necesitan al menos 6 observaciones para medir la volatilidad.";
+  const m=v.vol.last,u=unidadMov(v),emp=esc(S.emp.nombre);
+  let t=`${esc(v.nombre)} ${m>0?"subió":m<0?"bajó":"no cambió"}${m?" "+fmt(Math.abs(m),2)+" "+u:""} ${v.vol.simulado?"(movimiento simulado)":"en "+esc(v.vol.periodo)}, ${fmt(Math.abs(v.vol.z),1)} veces su movimiento típico: <b>${NIVEL_TXT[v.vol.nivel].toLowerCase()}</b>.`;
+  t+=` Para ${emp} una subida es ${v.ef>0?"favorable":"desfavorable"}${m?`, así que este movimiento es <b>${Math.sign(m)*v.ef>0?"favorable":"desfavorable"}</b>`:""}.`;
+  if(v.reciente&&v.reciente.texto)t+=` <b>Dato más reciente:</b> ${esc(v.reciente.texto)}`;
+  if(v.pr.prox!=null)t+=` Las proyecciones apuntan a cerrar ${v.pr.anio} en ${fmtV(v,v.pr.prox)}${v.pr.dir?(v.pr.dir>0?" (por encima":" (por debajo")+" del último dato, "+(v.proyEfecto==="fav"?"favorable":"desfavorable")+")":""}.`;
+  return t}
+function levelSVG(v){
+  const s=sortS(v.serie).slice(-16);if(s.length<2)return "";
+  const hz=[...new Set((v.proy||[]).filter(p=>p.tipo!=="promedio"&&num(p.valor)!=null).map(p=>String(p.horizonte)))].sort().slice(0,2);
+  const groups=hz.map(h=>{const xs=(v.proy||[]).filter(p=>String(p.horizonte)===h&&p.tipo!=="promedio").map(p=>num(p.valor)).filter(x=>x!=null);return{h,min:Math.min(...xs),max:Math.max(...xs),m:mean(xs),n:xs.length}});
+  const W=360,H=150,l=46,r=8,t=16,b=26,n=s.length+groups.length;
+  const vals=[...s.map(o=>o.v),...groups.flatMap(g=>[g.min,g.max])];let lo=Math.min(...vals),hi=Math.max(...vals);const pad=(hi-lo)*.12||1;lo-=pad;hi+=pad;
+  const X=i=>l+(i+.5)*(W-l-r)/n,Y=y=>t+(hi-y)/(hi-lo)*(H-t-b);let g="";
+  [lo+pad,(lo+hi)/2,hi-pad].forEach(y=>{g+=`<line x1="${l}" x2="${W-r}" y1="${Y(y)}" y2="${Y(y)}" stroke="var(--line)" stroke-dasharray="2 3"/><text x="${l-5}" y="${Y(y)+3}" text-anchor="end" font-size="9.5" fill="var(--muted)">${fmtV(v,y)}</text>`});
+  g+=`<polyline fill="none" stroke="var(--accent)" stroke-width="2" points="${s.map((o,i)=>X(i)+","+Y(o.v)).join(" ")}"/>`;
+  const last=s[s.length-1];g+=`<circle cx="${X(s.length-1)}" cy="${Y(last.v)}" r="4" fill="${v.vol&&v.vol.nivel===3?"var(--bad)":v.vol&&v.vol.nivel===2?"var(--warn)":"var(--accent)"}" stroke="var(--surface)" stroke-width="1.5"/>`;
+  [0,Math.floor((s.length-1)/2),s.length-1].forEach((i,k)=>g+=`<text x="${X(i)}" y="${H-12}" text-anchor="${k===0?"start":k===2?"end":"middle"}" font-size="9.5" fill="var(--muted)">${esc(s[i].p)}</text>`);
+  groups.forEach((gr,k)=>{const x=X(s.length+k);if(k===0)g+=`<line x1="${X(s.length-.5)}" x2="${X(s.length-.5)}" y1="${t}" y2="${H-b}" stroke="var(--line)"/>`;
+    g+=`<line x1="${x}" x2="${x}" y1="${Y(gr.max)}" y2="${Y(gr.min)}" stroke="var(--gold)" stroke-width="6" stroke-linecap="round" opacity=".35"/><rect x="${x-4}" y="${Y(gr.m)-4}" width="8" height="8" transform="rotate(45 ${x} ${Y(gr.m)})" fill="var(--gold)"/><text x="${x}" y="${t+1}" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--gold)">${esc((gr.h.match(/20(\d\d)/)||[,gr.h])[1]?"’"+(gr.h.match(/20(\d\d)/)||[,""])[1]:gr.h)}</text>`});
+  g+=`<text x="${W-r}" y="${H-1}" text-anchor="end" font-size="9" fill="var(--muted)">${groups.length?"◆ proyección (promedio de organismos) · ’26 = cierre 2026":""}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Serie histórica y proyecciones de ${esc(v.nombre)}">${g}</svg>`}
+function stepsSVG(v){
+  const V=v.vol;if(!V)return "";const st=V.steps.slice(-(V.W+1));if(V.simulado)st.push(V.last);
+  const W=360,H=120,l=46,r=8,t=8,b=18;const ext=Math.max(...st.map(Math.abs),Math.abs(V.mu)+2.2*V.sig)*1.05;
+  const X=i=>l+i*(W-l-r)/st.length,bw=(W-l-r)/st.length*.7,Y=y=>t+(ext-y)/(2*ext)*(H-t-b);let g="";
+  g+=`<rect x="${l}" y="${Y(V.mu+2*V.sig)}" width="${W-l-r}" height="${Y(V.mu-2*V.sig)-Y(V.mu+2*V.sig)}" fill="var(--warn-soft)"/>`;
+  g+=`<rect x="${l}" y="${Y(V.mu+V.sig)}" width="${W-l-r}" height="${Y(V.mu-V.sig)-Y(V.mu+V.sig)}" fill="var(--ok-soft)"/>`;
+  g+=`<line x1="${l}" x2="${W-r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  [[V.mu+V.sig,"+1σ"],[V.mu-V.sig,"−1σ"],[V.mu+2*V.sig,"+2σ"],[V.mu-2*V.sig,"−2σ"]].forEach(([y,lab])=>{if(Math.abs(y)<ext)g+=`<text x="${l-5}" y="${Y(y)+3}" text-anchor="end" font-size="9" fill="var(--muted)">${lab}</text>`});
+  st.forEach((x,i)=>{const isL=i===st.length-1;const c=isL?(V.nivel===3?"var(--bad)":V.nivel===2?"var(--warn)":"var(--ok)"):"var(--muted)";
+    g+=`<rect x="${X(i)+(W-l-r)/st.length*.15}" y="${Math.min(Y(x),Y(0))}" width="${bw}" height="${Math.max(1,Math.abs(Y(x)-Y(0)))}" fill="${c}" opacity="${isL?1:.45}"/>`});
+  g+=`<text x="${l}" y="${H-3}" font-size="9" fill="var(--muted)">Movimiento por periodo (${unidadMov(v)}). Verde: ±1σ · amarillo: ±2σ · ventana ${V.W} periodos</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Movimientos y bandas de volatilidad">${g}</svg>`}
+function heatSVG(C){
+  const W=420,H=330,l=92,t=16,c=104,cols=["Normal","Inusual","Muy inusual"];let g="";
+  for(let ex=3;ex>=1;ex--)for(let vo=1;vo<=3;vo++){const x=l+(vo-1)*c,y=t+(3-ex)*c*.82,h=c*.82,sc=ex*vo;
+    g+=`<rect x="${x}" y="${y}" width="${c}" height="${h}" fill="${sc>=6?"var(--bad-soft)":sc>=3?"var(--warn-soft)":"var(--ok-soft)"}" stroke="var(--surface)" stroke-width="3"/>`;
+    const vs=C.V.filter(v=>v.exp&&v.vol&&v.exp.n===ex&&v.vol.nivel===vo).sort(byCode);
+    vs.forEach((v,i)=>{const cx=x+10+(i%2)*46,cy=y+12+Math.floor(i/2)*24;g+=`<rect x="${cx}" y="${cy}" width="42" height="19" rx="4" fill="var(--surface)" stroke="${sc>=6?"var(--bad)":sc>=3?"var(--warn)":"var(--ok)"}"/><text x="${cx+21}" y="${cy+13.5}" text-anchor="middle" font-size="10.5" font-weight="600" font-family="var(--f-mono)" fill="var(--ink)">${esc(v.codigo)}</text>`})}
+  ["Alta","Media","Baja"].forEach((s,i)=>g+=`<text x="${l-8}" y="${t+i*c*.82+c*.41+4}" text-anchor="end" font-size="11" fill="var(--ink)">${s}</text>`);
+  cols.forEach((s,i)=>g+=`<text x="${l+i*c+c/2}" y="${t+3*c*.82+16}" text-anchor="middle" font-size="11" fill="var(--ink)">${s}</text>`);
+  g+=`<text x="${l+1.5*c}" y="${H-4}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--muted)">Volatilidad del último movimiento</text>`;
+  g+=`<text transform="translate(14 ${t+1.5*c*.82}) rotate(-90)" text-anchor="middle" font-size="11" font-weight="600" fill="var(--muted)">Exposición de la empresa</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="Mapa de riesgo macroeconómico">${g}</svg>`}
+function finCard(C){
+  const FX=C.FX,e=S.emp,R=FX.rows;const u=esc(e.finUnidad||"millones de COP");
+  const head=`<div class="cardhead"><div><h2>Estados financieros simplificados</h2><p>Seis cifras por año, en ${u}. Con ellas se mide qué tan expuesta está la empresa a cada variable.</p></div>${S.canWrite?'<button class="pri" data-act="editFin">Editar cifras</button>':""}</div>`;
+  if(!R.length)return `<div class="card">${head}<div class="empty">Aún no hay cifras. Carga ingresos, egresos, utilidad neta, activos, pasivos y patrimonio de los últimos 3 años.</div></div>`;
+  const row=(l,f,d=1,suf="")=>`<tr><td>${l}</td>${R.map(r=>`<td class="n">${f(r)==null?"—":fmt(f(r),d)+suf}</td>`).join("")}</tr>`;
+  const ver=R.some(r=>r.verificacion==="ilustrativo")?'<span class="pill p-warn">Cifras ilustrativas</span>':"";
+  return `<div class="card">${head}${ver}<div class="tbl" style="margin-top:8px"><table><thead><tr><th>Concepto</th>${R.map(r=>`<th class="n">${esc(r.anio)}</th>`).join("")}</tr></thead><tbody>
+   ${row("Ingresos",r=>r.ing,0)}${row("Egresos",r=>r.egr,0)}${row("Utilidad neta",r=>r.ut,0)}${row("Activos",r=>r.A,0)}${row("Pasivos",r=>r.Pa,0)}${row("Patrimonio",r=>r.Pt,0)}
+   <tr><td colspan="${R.length+1}" class="eyebrow" style="background:var(--sunk)">Lecturas que calcula la app</td></tr>
+   ${row("Crecimiento de ingresos (nominal)",r=>r.gIng,1," %")}${row("Inflación de diciembre (DANE)",r=>r.pi,2," %")}${row("Crecimiento de ingresos (real)",r=>r.real,1," %")}
+   ${row("Crecimiento del PIB (promedio de los 4 trimestres)",r=>r.pib,1," %")}${row("Veces que creció frente a la economía",r=>r.mult,1,"×")}${row("Crecimiento de egresos",r=>r.gEgr,1," %")}${row("Margen neto",r=>r.margen,1," %")}${row("Endeudamiento (pasivo / activo)",r=>r.endeud,0," %")}
+   <tr><td>¿Cuadra activo = pasivo + patrimonio?</td>${R.map(r=>`<td class="n">${r.cuadre==null?"—":r.cuadre<=.01?'<span class="pill p-ok">Sí</span>':'<span class="pill p-bad">No · revisar</span>'}</td>`).join("")}</tr>
+  </tbody></table></div>
+  <dl class="kv" style="margin-top:10px"><dt>Tipo de empresa</dt><dd>${e.tipoEmpresa==="aseguradora"?"Aseguradora":"Comercial / de consumo"}</dd><dt>Dólares</dt><dd>Importa: ${({si:"sí",no:"no"})[e.importa]||"sin dato"} · exporta: ${({si:"sí",no:"no"})[e.exporta]||"sin dato"} · deuda en dólares: ${({si:"sí",no:"no"})[e.deudaUSD]||"sin dato"}${e.dolarNota?`<div class="muted">${esc(e.dolarNota)}</div>`:""}</dd><dt>Fuente</dt><dd>${esc(R.map(r=>r.fuente).filter(Boolean)[0]||"—")}</dd></dl></div>`}
+function vEntorno(C){
+  const e=S.emp,V=[...C.V].sort(byCode);
+  const allP=V.flatMap(v=>(v.proy||[]).map(p=>({...p,v})));
+  return `${headerEmp(C)}
+  ${tareaCard(C,"Macroeconomía")}${actStrip()}${insightCard("Qué dice el entorno",insightsI(C))}${esencialI(C)}<details class="det" data-det="entorno"${S.det&&S.det["entorno"]?" open":""}><summary><b>Ver detalle completo</b><span>Panorama de variables, gráficas, estados financieros, exposición, MEFE, proyecciones, PESTEL y nivel avanzado</span></summary><div class="detin">
+  <div class="card"><div class="cardhead"><div><div class="eyebrow">Módulo I · Macroeconomía</div><h2>Panorama de variables ${qm("semaforo")}</h2><p>Cada variable se compara con su propio comportamiento reciente: el semáforo dice qué tan inusual fue el último movimiento, y la última columna si ese movimiento le conviene o no a ${esc(e.nombre)}.</p></div>${S.canWrite?'<button class="pri" data-new="variables">Agregar variable</button>':""}</div>
+  ${V.length?`<div class="tbl"><table><thead><tr><th>Variable</th><th class="n">Último dato</th><th class="n">Movimiento</th><th>Semáforo de volatilidad</th><th class="n">Volatilidad reciente</th><th class="n">Se espera al cierre</th><th>Efecto para la empresa</th></tr></thead><tbody>
+  ${V.map(v=>`<tr class="click" data-edit="variables" data-id="${esc(v.id)}"><td><span class="code">${esc(v.codigo)}</span> <b>${esc(v.nombre)}</b><div class="muted" style="font-size:12px">${esc(v.fuente||"")}${v.verificacion==="por_verificar"?' · <span style="color:var(--warn)">POR VERIFICAR</span>':v.verificacion==="verificado"?' · fuente oficial':""}</div></td>
+   <td class="n">${v.vol?fmtV(v,v.vol.valor):(v.ultimo?fmtV(v,v.ultimo.v):"—")}<div class="muted" style="font-size:11px">${esc(v.ultimo?v.ultimo.p:"")}</div>${v.reciente&&v.reciente.corto?`<div style="font-size:11px;color:${v.reciente.alerta?"var(--warn)":"var(--muted)"}">Reciente: ${esc(v.reciente.corto)}</div>`:""}</td>
+   <td class="n">${v.movEf==null?"—":(v.movEf>0?"+":"")+fmt(v.movEf,2)+" "+unidadMov(v)}${v.simOn?'<div class="muted" style="font-size:11px">simulado</div>':""}</td>
+   <td>${nivelPill(v.vol?v.vol.nivel:0)}${v.vol?`<div class="muted" style="font-size:11px">${fmt(Math.abs(v.vol.z),1)} veces lo típico</div>`:""}</td>
+   <td class="n">${v.vol&&v.vol.ratio!=null?(v.vol.ratio>1.25?'<span style="color:var(--bad);font-weight:600">En aumento</span>':v.vol.ratio<.8?'<span style="color:var(--ok);font-weight:600">Calmándose</span>':"Estable")+`<div class="muted" style="font-size:11px">${fmt(v.vol.ratio,1)}× la histórica</div>`:"—"}</td>
+   <td class="n">${v.pr.prox!=null?fmtV(v,v.pr.prox)+`<div class="muted" style="font-size:11px">${v.pr.anio} · ${(v.pr.P.filter(p=>String(p.horizonte).includes(String(v.pr.anio))&&p.tipo!=="promedio")).length} fuente(s)</div>`:"—"}</td>
+   <td>${v.movEf?efPill(Math.sign(v.movEf)*v.ef>0?"fav":"desf"):'<span class="pill p-line">Sin movimiento</span>'}${v.proyEfecto?`<div class="muted" style="font-size:11px">Proyección: ${v.proyEfecto==="fav"?"favorable":"desfavorable"}</div>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Aún no hay variables.</div>'}
+  </div>
+  <div class="grid2">${V.filter(v=>(v.serie||[]).length).map(v=>`<div class="card"><div class="cardhead"><div><div class="eyebrow">${esc(v.codigo)} · ${esc((CANALES.find(c=>c[0]===v.canal)||[,""])[1])}</div><h3>${esc(v.nombre)}</h3></div>${nivelPill(v.vol?v.vol.nivel:0)}</div>
+    ${levelSVG(v)}${stepsSVG(v)}<p style="font-size:13px;margin:8px 0 0">${frase(v)}</p></div>`).join("")}</div>
+  ${finCard(C)}
+  <div class="grid2">
+   <div class="card"><div class="cardhead"><div><h2>Mapa de riesgo ${qm("riesgo")}</h2><p>Cruza qué tan expuesta está la empresa con qué tan agitada está cada variable.</p></div></div>${heatSVG(C)}
+    ${V.filter(v=>!v.exp||!v.vol).length?`<p class="muted" style="font-size:12px">Sin ubicar por falta de datos: ${V.filter(v=>!v.exp||!v.vol).map(v=>esc(v.codigo)).join(", ")}.</p>`:""}</div>
+   <div class="card"><div class="cardhead"><div><h2>¿Qué tanto le afecta cada variable? ${qm("exposicion")}</h2><p>Lecturas automáticas a partir de las seis cifras. El equipo puede fijarla a mano en cada variable.</p></div></div>
+    <div class="tbl"><table><thead><tr><th>Variable</th><th>Exposición</th><th>Sustento</th></tr></thead><tbody>${V.map(v=>`<tr><td><span class="code">${esc(v.codigo)}</span> ${esc(v.nombre)}</td><td>${v.exp?`<span class="pill ${v.exp.n===3?"p-bad":v.exp.n===2?"p-warn":"p-ok"}">${EXP_TXT[v.exp.n]}</span>`:'<span class="pill p-line">Sin datos</span>'}</td><td style="font-size:12.5px">${v.exp?esc(v.exp.why):"Faltan cifras financieras o respuestas sobre dólares."}</td></tr>`).join("")}</tbody></table></div></div>
+  </div>
+  <div class="card"><div class="cardhead"><div><h2>¿Qué tan bien responde al entorno? · MEFE ${qm("mefe")}</h2><p>${C.metodo==="correlacion"?"Peso derivado de la correlación con los ingresos (nivel avanzado).":"Peso = exposición × volatilidad, normalizado para que sume 1. La calificación (1–4) mide qué tan bien responde la empresa y la asigna el equipo."}</p></div><button data-act="editEmp">Cambiar método</button></div>
+  <div class="tbl"><table><thead><tr><th>Código</th><th>Factor externo</th><th>Exposición</th><th>Volatilidad</th><th>Riesgo</th><th class="n">Peso</th><th>Tipo</th><th class="n">Calif.</th><th class="n">Ponderado</th></tr></thead><tbody>
+  ${V.map(v=>`<tr class="click" data-edit="variables" data-id="${esc(v.id)}"><td class="code">${esc(v.codigo)}</td><td>${esc(v.nombre)}</td><td>${v.exp?EXP_TXT[v.exp.n]:"—"}</td><td>${v.vol?NIVEL_TXT[v.vol.nivel]:"—"}</td><td>${riesgoPill(v.riesgo)}</td><td class="n">${v.peso==null?"—":fmt(v.peso,3)}</td><td>${tipoPill(v.tipo)}</td><td class="n">${esc(v.calificacion||"—")}</td><td class="n">${fmt(v.pond,3)}</td></tr>`).join("")}
+  </tbody><tfoot><tr><td colspan="5">Total ponderado MEFE</td><td class="n">${fmt(V.reduce((a,v)=>a+(v.peso||0),0),3)}</td><td></td><td></td><td class="n">${fmt(C.mefe,3)}</td></tr></tfoot></table></div></div>
+  <div class="card"><div class="cardhead"><div><h2>Proyecciones ${qm("proyeccion")}</h2><p>Escenario de referencia para 2026 y 2027. Cada cifra con su fuente y fecha.</p></div></div>
+  ${allP.length?`<div class="tbl"><table><thead><tr><th>Variable</th><th>Fuente</th><th>Publicación</th><th>Horizonte</th><th class="n">Valor</th><th>Tipo</th><th>Nota</th></tr></thead><tbody>${allP.map(p=>`<tr><td><span class="code">${esc(p.v.codigo)}</span> ${esc(p.v.nombre)}</td><td>${p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.org)}</a>`:esc(p.org)}</td><td>${esc(p.fecha||"—")}</td><td>${esc(p.horizonte)}</td><td class="n">${fmtV(p.v,num(p.valor))}</td><td>${p.tipo==="promedio"?"Promedio anual":p.tipo==="anual"?"Crecimiento anual":"Cierre de año"}</td><td style="font-size:12px">${esc(p.nota||"")}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Sin proyecciones cargadas.</div>'}
+  </div>
+  <div class="card"><div class="cardhead"><div><h2>PESTEL · lectura cualitativa del entorno</h2><p>Complementa la MEFE con factores que no tienen serie numérica.</p></div>${S.canWrite?'<button data-new="pestel">Agregar factor</button>':""}</div>
+  ${C.P.length?`<div class="tbl"><table><thead><tr><th>Código</th><th>Dimensión</th><th>Factor</th><th>Tipo</th><th class="n">Impacto 1–5</th><th>Fuente</th></tr></thead><tbody>${[...C.P].sort(byCode).map(p=>`<tr class="click" data-edit="pestel" data-id="${esc(p.id)}"><td class="code">${esc(p.codigo)}</td><td>${esc((PESTEL.find(x=>x[0]===p.dimension)||[,""])[1])}</td><td>${esc(p.factor)}</td><td>${tipoPill(p.tipo)}</td><td class="n">${esc(p.impacto||"—")}</td><td style="font-size:12.5px">${esc(p.fuente||"—")}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Sin factores PESTEL.</div>'}
+  </div>
+  <details class="card"><summary style="cursor:pointer"><b>Nivel avanzado · sensibilidad estadística</b> <span class="muted">(solo con 12 o más trimestres de ingresos)</span></summary>
+   <p class="muted" style="font-size:13px">Correlación entre la variación de cada variable y la de los ingresos trimestrales. Con 3 años de cifras anuales no aplica; queda disponible para cuando haya series trimestrales, por ejemplo de la Superintendencia Financiera.</p>
+   <dl class="kv"><dt>Serie de ingresos</dt><dd>${esc(e.ingresosNombre||"—")} · ${(e.ingresos||[]).length} periodos · ${C.revN} variaciones</dd></dl>
+   ${(e.ingresos||[]).length?`<div class="tbl" style="margin-top:8px"><table><thead><tr><th>Código</th><th>Variable</th><th class="n">n</th><th class="n">r</th><th class="n">β</th><th class="n">Peso por correlación</th></tr></thead><tbody>${V.map(v=>`<tr><td class="code">${esc(v.codigo)}</td><td>${esc(v.nombre)}</td><td class="n">${v.n}</td><td class="n">${fmt(v.r)}</td><td class="n">${fmt(v.beta)}</td><td class="n">${v.pesoCorr==null?"—":fmt(v.pesoCorr,3)}</td></tr>`).join("")}</tbody></table></div>`:""}
+  </details></div></details>`}
+function vInterno(C){
+  const e=S.emp,F=[...C.F].sort(byCode);
+  const expV=C.V.filter(v=>v.exp&&v.exp.n>=2&&CANAL_ESLABON[v.canal]&&(v.serie||[]).length);
+  const slot=(k,l)=>`<div class="slot"><h4>${l}</h4>${expV.filter(v=>CANAL_ESLABON[v.canal]===k).map(v=>`<div class="fd ext" title="${esc(v.exp.why)}"><span class="code">${esc(v.codigo)}</span> ${esc(v.nombre)} · exposición ${EXP_TXT[v.exp.n].toLowerCase()}</div>`).join("")}${F.filter(f=>f.eslabon===k).map(f=>`<div class="fd ${f.tipo==="D"?"d":""}"><span class="code">${esc(f.codigo)}</span> ${esc(f.factor)}</div>`).join("")||(expV.some(v=>CANAL_ESLABON[v.canal]===k)?"":'<span class="muted" style="font-size:12px">—</span>')}</div>`;
+  const SG=sugerenciasMEFI(C);
+  const okP=Math.abs(C.sumPesoF-1)<=.001;
+  return `${headerEmp(C)}
+  ${tareaCard(C,"Planeación Estratégica")}${actStrip()}${insightCard("Qué dice el diagnóstico interno",insightsII(C))}${esencialII(C)}<details class="det" data-det="interno"${S.det&&S.det["interno"]?" open":""}><summary><b>Ver detalle completo</b><span>Cadena de valor, factores sugeridos, MEFI, BCG, ADL y conclusiones</span></summary><div class="detin">
+  <div class="card"><div class="cardhead"><div><div class="eyebrow">Módulo II · Planeación Estratégica</div><h2>Cadena de valor</h2><p>Factores internos ubicados en su eslabón (verde: fortaleza; rojo: debilidad). En azul punteado, por dónde entran a la empresa las variables macro con exposición media o alta según el Módulo I.</p></div></div>
+   <div class="vc">${ESLABONES.map(x=>slot(...x)).join("")}<div class="apoyo">${APOYO.map(x=>slot(...x)).join("")}</div></div>
+  </div>
+  <div class="card"><div class="cardhead"><div><div class="eyebrow">Viene del Módulo I</div><h2>Factores sugeridos desde los estados financieros</h2><p>La app los propone con su evidencia numérica. El equipo decide si los incorpora a la MEFI y les asigna peso y calificación.</p></div><button class="ghost" data-tab="entorno">Ver cifras →</button></div>
+  ${SG.length?`<div class="tbl"><table><thead><tr><th>Tipo</th><th>Factor sugerido</th><th>Eslabón</th><th>Evidencia</th><th></th></tr></thead><tbody>${SG.map((g,i)=>`<tr><td>${g.tipo==="D"?'<span class="pill p-bad">Debilidad</span>':'<span class="pill p-ok">Fortaleza</span>'}</td><td><b>${esc(g.factor)}</b></td><td style="font-size:12.5px">${esc(([...ESLABONES,...APOYO].find(x=>x[0]===g.eslabon)||[,"—"])[1])}</td><td style="font-size:12.5px">${esc(g.evidencia.split(" Fuente:")[0])}</td><td>${g.usado?'<span class="pill p-acc">Ya en la MEFI</span>':S.canWrite?`<button data-sug="${i}" style="white-space:nowrap">Agregar a la MEFI</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Carga al menos dos años de estados financieros en el Módulo I para ver sugerencias.</div>'}
+  </div>
+  <div class="card"><div class="cardhead"><div><h2>Fortalezas y debilidades · MEFI ${qm("mefi")}</h2><p>Los pesos deben sumar 1,00. Calificación: 1 debilidad mayor, 2 debilidad menor, 3 fortaleza menor, 4 fortaleza mayor.</p></div>${S.canWrite?'<button class="pri" data-new="internos">Agregar factor interno</button>':""}</div>
+  ${F.length?`<div class="tbl"><table><thead><tr><th>Código</th><th>Tipo</th><th>Factor</th><th>Eslabón</th><th>Evidencia (fuente pública)</th><th class="n">Peso</th><th class="n">Calif.</th><th class="n">Pond.</th></tr></thead><tbody>
+  ${F.map(f=>`<tr class="click" data-edit="internos" data-id="${esc(f.id)}"><td class="code">${esc(f.codigo)}</td><td>${f.tipo==="D"?'<span class="pill p-bad">Debilidad</span>':'<span class="pill p-ok">Fortaleza</span>'}</td><td>${esc(f.factor)}</td><td style="font-size:12.5px">${esc(([...ESLABONES,...APOYO].find(x=>x[0]===f.eslabon)||[,"—"])[1])}</td><td style="font-size:12.5px">${esc(f.evidencia||"—")}</td><td class="n">${fmt(f.p,2)}</td><td class="n">${esc(f.c??"—")}</td><td class="n">${fmt(f.pond,2)}</td></tr>`).join("")}
+  </tbody><tfoot><tr><td colspan="5">Total ponderado MEFI ${okP?"":'<span class="pill p-bad">Los pesos no suman 1,00</span>'}</td><td class="n">${fmt(C.sumPesoF)}</td><td></td><td class="n">${fmt(C.mefi)}</td></tr></tfoot></table></div>`:'<div class="empty">Sin factores internos.</div>'}
+  </div>
+  <div class="grid2">
+   <div class="card"><div class="cardhead"><div><h2>Portafolio · BCG ${qm("bcg")}</h2><p>Corte de crecimiento: <b>${fmt(C.bcg.corte,1)} %</b>. ${esc(C.bcg.why)}</p></div>${S.canWrite?'<button data-new="unidades">Agregar unidad</button>':""}</div>
+    ${C.U.length?bcgSVG(C.U,C.bcg.corte)+`<div class="tbl" style="margin-top:10px"><table><thead><tr><th>Código</th><th>Unidad</th><th class="n">Crec. %</th><th class="n">Part. rel.</th><th>Cuadrante</th></tr></thead><tbody>${[...C.U].sort(byCode).map(u=>`<tr class="click" data-edit="unidades" data-id="${esc(u.id)}"><td class="code">${esc(u.codigo)}</td><td>${esc(u.nombre)}${u.verificacion==="ilustrativo"?' <span class="pill p-warn">Ilustrativo</span>':""}</td><td class="n">${fmt(u.g,1)}</td><td class="n">${fmt(u.q,2)}</td><td>${esc(u.cuad||"—")}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Sin unidades de negocio.</div>'}
+   </div>
+   <div class="card"><div class="cardhead"><div><h2>Madurez y posición · ADL ${qm("adl")}</h2><p>${e.adlMadurez&&e.adlPosicion?`Sector en ${esc(ADL_M.find(x=>x[0]===e.adlMadurez)?.[1]||"")}, posición ${esc(ADL_P.find(x=>x[0]===e.adlPosicion)?.[1]||"")}: <b>${ADL_TXT[ADL_Z[e.adlPosicion][ADL_M.findIndex(x=>x[0]===e.adlMadurez)]]}</b>.`:"Define madurez y posición en Datos de la empresa."}</p></div><button data-act="editEmp">Editar</button></div>
+    ${adlTable(e.adlMadurez,e.adlPosicion)}<p class="muted" style="font-size:12px;margin:8px 0 0">Zonas orientativas. Contrastar con el manual de administración estratégica adoptado en los syllabus.</p>
+   </div>
+  </div>
+  <div class="card"><div class="cardhead"><div><h2>Conclusiones del diagnóstico</h2><p>Síntesis que alimenta la formulación del Módulo III.</p></div><button data-act="editEmp">Editar</button></div>
+   <div style="white-space:pre-wrap;max-width:85ch">${esc(e.conclusiones||"Sin conclusiones registradas.")}</div></div></div></details>`}
+
+function planTable(C){
+  const E=[...C.E].sort(byCode);if(!E.length)return '<div class="empty">Primero formula al menos una estrategia con sus tácticas.</div>';
+  let rows="";
+  E.forEach(s=>{
+    const tacs=tacticasDe(s);const groups=tacs.map(t=>({t,tasks:s.ts.filter(x=>x.tactica===t).sort((a,b)=>String(a.inicio||"").localeCompare(String(b.inicio||""))||byCode(a,b))}));
+    const huerf=s.ts.filter(x=>!x.tacOk);if(huerf.length)groups.push({t:null,tasks:huerf});
+    if(!groups.length)groups.push({t:"",tasks:[],sinTac:true});
+    const spanE=groups.reduce((a,g)=>a+g.tasks.length+1,0);let first=true;
+    groups.forEach(g=>{
+      const spanT=g.tasks.length+1;
+      const tacCell=g.sinTac?`<td class="tac muted" rowspan="${spanT}">La estrategia no tiene tácticas. <button class="ghost" data-edit="estrategias" data-id="${esc(s.id)}">Agregar tácticas</button></td>`
+        :g.t===null?`<td class="tac" rowspan="${spanT}"><span class="pill p-warn">Táctica modificada o eliminada</span><div class="muted">Reasigna estas tareas.</div></td>`
+        :`<td class="tac" rowspan="${spanT}">${esc(g.t)}</td>`;
+      const lead=(first?`<td class="grp" rowspan="${spanE}">${esc(s.objetivo||"—")}</td><td class="grp" rowspan="${spanE}"><span class="code">${esc(s.codigo)}</span> ${esc(s.estrategia)}<div class="muted" style="font-weight:400">Plazo: ${fDate(s.inicio)} → ${fDate(s.fin)}</div></td>`:"")+tacCell;first=false;
+      let leadUsed=false;const L=()=>{if(leadUsed)return"";leadUsed=true;return lead};
+      g.tasks.forEach(t=>{const a=`data-edit="tareas" data-id="${esc(t.id)}" style="cursor:pointer"`;rows+=`<tr>${L()}<td class="task" ${a}><span class="code">${esc(t.codigo)}</span> ${esc(t.tarea)}${t.fechaMal?'<div><span class="pill p-bad">El cierre es anterior al inicio</span></div>':""}${t.fueraPlazo?'<div><span class="pill p-warn">Fuera del plazo de la estrategia</span></div>':""}</td><td class="n" ${a}>${fDate(t.inicio)}</td><td class="n" ${a}>${fDate(t.fin)}</td><td ${a}>${esc(t.responsable||"—")}</td><td ${a}>${esc(t.recursos||"—")}</td></tr>`});
+      rows+=`<tr class="newtask">${L()}<td colspan="5">${S.canWrite&&!g.sinTac&&g.t!==null?`<button class="ghost" data-newtask="${esc(s.id)}" data-tac="${esc(g.t)}">+ Agregar tarea</button>`:""}</td></tr>`;
+    });
+  });
+  return `<div class="tbl plan"><table><thead><tr><th>Objetivo estratégico</th><th>Estrategia</th><th>Táctica</th><th>Tarea</th><th class="n">Fecha de inicio</th><th class="n">Fecha de cierre</th><th>Responsable</th><th>Recursos</th></tr></thead><tbody>${rows}</tbody></table></div>`}
+
+function vEstrategia(C){
+  const E=[...C.E].sort(byCode);
+  const tTot=C.T.length,tOk=C.T.filter(t=>t.completa&&!t.fechaMal).length,tacSin=E.reduce((a,s)=>a+tacticasDe(s).filter(t=>!s.ts.some(x=>x.tactica===t)).length,0);
+  return `${headerEmp(C)}
+  ${tareaCard(C,"Gerencia Estratégica")}${actStrip()}${insightCard("Qué dice el plan",insightsIII(C))}${esencialIII(C)}<details class="det" data-det="estrategia"${S.det&&S.det["estrategia"]?" open":""}><summary><b>Ver detalle completo</b><span>Fichas de estrategia, plan de acción, indicadores y presupuesto</span></summary><div class="detin">
+  <div class="banner" style="border-color:var(--accent);background:var(--accent-soft)"><b style="color:var(--accent)">Alcance del Módulo III:</b> llega hasta la <b>formulación</b> del plan estratégico y del plan de acción. La ejecución y el seguimiento real corresponden a la organización. Los valores medidos de los indicadores sirven para ilustrar cómo funcionaría el control.</div>
+  <div class="card"><div class="cardhead"><div><div class="eyebrow">Módulo III · Gerencia Estratégica</div><h2>Plan estratégico</h2><p>Cada estrategia declara de qué variable del entorno y de qué factor interno nace, y qué indicador la vigila.</p></div>${S.canWrite?'<button class="pri" data-new="estrategias">Agregar estrategia</button>':""}</div>
+  ${E.length?`<div class="strat">${E.map(s=>`<div class="card ${s.rev?"rev":""}">
+    <div class="row"><span class="code">${esc(s.codigo)}</span>${s.tipo?`<span class="pill p-acc">${esc(s.tipo)}</span>`:""}<div class="spacer"></div>${s.rev?'<span class="pill p-bad">En revisión</span>':'<span class="pill p-ok">Vigente</span>'}<button class="ghost" data-edit="estrategias" data-id="${esc(s.id)}">Editar</button></div>
+    <div class="eyebrow">Objetivo</div><div>${esc(s.objetivo||"—")}</div>
+    <h3>${esc(s.estrategia||"—")}</h3>
+    ${s.tacticas?`<div class="eyebrow">Tácticas</div><ul class="tac">${String(s.tacticas).split(/\n+/).filter(Boolean).map(t=>`<li>${esc(t.replace(/^[-•]\s*/,""))}</li>`).join("")}</ul>`:""}
+    <dl class="kv"><dt>Presupuesto</dt><dd>${cop(num(s.presupuesto))}</dd><dt>Plazo</dt><dd>${esc(s.inicio||"—")} → ${esc(s.fin||"—")}</dd><dt>Responsable</dt><dd>${esc(s.responsable||"—")}</dd></dl>
+    <div class="eyebrow">Origen</div><div class="chips">${s.vs.map(v=>`<span class="chip ${v.alerta?"alert":""}" title="${esc(v.nombre)}">${esc(v.codigo)}</span>`).join("")}${s.ps.map(p=>`<span class="chip" title="${esc(p.factor)}">${esc(p.codigo)}</span>`).join("")}${s.fs.map(f=>`<span class="chip" title="${esc(f.factor)}">${esc(f.codigo)}</span>`).join("")||(!s.vs.length&&!s.ps.length?'<span class="muted">Sin origen declarado</span>':"")}</div>
+    <div class="eyebrow">Indicadores</div><div class="chips">${s.ks.map(k=>`<span class="chip" title="${esc(k.nombre)}">${esc(k.codigo)}</span>`).join("")||'<span class="muted">Sin indicador</span>'}</div>
+    ${s.rev?`<div class="banner" style="border-color:var(--bad);background:var(--bad-soft)">Se movió ${s.alertV.map(v=>`<b style="color:var(--bad)">${esc(v.codigo)} ${esc(v.nombre)}</b>`).join(", ")} por encima de su umbral. Revisar supuestos, tácticas y metas.</div>`:""}
+  </div>`).join("")}</div>`:'<div class="empty">Sin estrategias formuladas.</div>'}
+  </div>
+  <div class="card"><div class="cardhead"><div><h2>Plan de acción</h2><p>Objetivo y estrategia se toman de lo formulado; las tácticas, de cada estrategia. Las tareas, fechas, responsables y recursos se registran a mano. ${tTot} tareas · ${tOk} completas${tacSin?` · <span style="color:var(--warn);font-weight:600">${tacSin} táctica(s) sin tareas</span>`:""}</p></div>${S.dl?'<button data-act="exportPlan">Exportar plan (CSV)</button>':""}</div>${planTable(C)}</div>
+  <div class="card"><div class="cardhead"><div><h2>Indicadores de seguimiento ${qm("cumplimiento")}</h2><p>Fórmula con numerador y denominador, línea base, meta y valor medido. Cumplimiento = (medido − base) / (meta − base).</p></div>${S.canWrite?'<button data-new="kpis">Agregar indicador</button>':""}</div>${kpiTable(C,false)}</div>
+  <div class="card"><div class="cardhead"><div><h2>Presupuesto consolidado</h2></div></div>
+   ${E.length?`<div class="tbl"><table><thead><tr><th>Código</th><th>Estrategia</th><th>Responsable</th><th class="n">Presupuesto COP</th><th class="n">% del plan</th></tr></thead><tbody>${E.map(s=>`<tr><td class="code">${esc(s.codigo)}</td><td>${esc(s.estrategia)}</td><td>${esc(s.responsable||"—")}</td><td class="n">${cop(num(s.presupuesto))}</td><td class="n">${C.presupuesto?fmt((num(s.presupuesto)||0)/C.presupuesto*100,1)+"%":"—"}</td></tr>`).join("")}</tbody><tfoot><tr><td colspan="3">Total</td><td class="n">${cop(C.presupuesto)}</td><td class="n">100%</td></tr></tfoot></table></div>`:'<div class="empty">—</div>'}
+  </div></div></details>`}
+
+function vTraza(C){
+  const V=[...C.V].sort(byCode),E=[...C.E].sort(byCode);
+  return `${headerEmp(C)}
+  <div class="card insight"><div class="eyebrow">Para qué sirve esta pestaña</div><h2 style="margin:2px 0 6px">Ver cómo se conecta todo y qué pasa si el entorno cambia</h2><p style="margin:0;max-width:90ch">Es la columna vertebral del proyecto: cada estrategia queda amarrada a la variable del entorno y al factor interno que la originaron, y al indicador que la vigila. Si una variable macro se mueve de forma inusual, la app marca en rojo qué decisiones e indicadores hay que revisar. El simulador permite probarlo sin cambiar los datos.</p></div>
+  <div class="card"><div class="cardhead"><div><div class="eyebrow">Capa transversal</div><h2>Simulador de choque</h2><p>Mueve una variable y mira qué decisiones e indicadores quedan en revisión. La simulación no se guarda.</p></div></div>
+   <div class="sim"><label>Variable<select id="simV"><option value="">Elegir…</option>${V.map(v=>`<option value="${esc(v.id)}" ${S.sim.vid===v.id?"selected":""}>${esc(v.codigo)} · ${esc(v.nombre)}</option>`).join("")}</select></label>
+   <label>Movimiento (en % o pp, según la variable)<input id="simX" type="number" step="0.01" value="${esc(S.sim.shock)}" style="width:140px"></label>
+   <button class="pri" data-act="sim">Simular</button><button data-act="simClear">Limpiar</button></div>
+   ${S.sim.vid&&num(S.sim.shock)!=null?(()=>{const v=C.V.find(x=>x.id===S.sim.vid);if(!v)return"";const af=C.E.filter(s=>s.alertV.some(a=>a.id===v.id));return `<div class="banner" style="margin-top:12px">${v.alerta?`<b>${esc(v.codigo)} ${num(v.umbral)!=null?`supera su umbral manual (±${esc(v.umbral)})`:`queda en rojo: el movimiento es ${fmt(Math.abs(v.vol.z),1)} veces lo típico`}.</b> Quedan en revisión ${af.length} estrategia(s) y ${af.reduce((a,s)=>a+s.ks.length,0)} indicador(es).`:`<b>${esc(v.codigo)}</b> ${num(v.umbral)!=null?`se mueve dentro de su umbral manual (±${esc(v.umbral)})`:(v.vol?`se mueve ${fmt(Math.abs(v.vol.z),1)} veces lo típico (${NIVEL_TXT[v.vol.nivel].toLowerCase()}); la alarma roja empieza en 2 veces`:"no tiene datos suficientes")}; ninguna decisión entra en revisión.`} ${v.impacto!=null?`Impacto estimado en el crecimiento de ingresos: ${v.impacto>0?"+":""}${fmt(v.impacto)} pp (β = ${fmt(v.beta)}, n = ${v.n}${v.expl?", exploratorio":""}).`:""}</div>`})():""}
+  </div>
+  <div class="card"><div class="cardhead"><div><h2>Mapa de decisiones ${qm("trazabilidad")}</h2><p>Lectura de izquierda a derecha: de dónde nace cada decisión y qué indicador la vigila.</p></div>
+   <label class="row" style="gap:6px;font-size:13px">Ver<select id="focusE"><option value="">Todas las decisiones</option>${E.map(s=>`<option value="${esc(s.id)}" ${S.focusE===s.id?"selected":""}>${esc(s.codigo)} · ${esc(s.estrategia)}</option>`).join("")}</select></label></div>
+   <div class="howto"><div><b>1. Origen.</b> A la izquierda, las variables macro (V), los factores PESTEL (P) y las fortalezas o debilidades internas (F). Los que no alimentan ninguna decisión aparecen atenuados.</div><div><b>2. Decisión.</b> En el centro, cada estrategia del Módulo III. Haz clic en una para ver solo su ruta.</div><div><b>3. Control.</b> A la derecha, el indicador que la vigila. Si una variable entra en alarma, toda su ruta se pinta de rojo.</div></div>
+   ${(C.E.length||C.V.length)?flowSVG(C):'<div class="empty">Sin datos.</div>'}</div>
+  <div class="card"><div class="cardhead"><div><h2>Registro de trazabilidad</h2><p>Una fila por decisión: variable del entorno → factor interno → estrategia → indicador.</p></div></div>
+  ${E.length?`<div class="tbl"><table><thead><tr><th>Decisión</th><th>Variable del entorno</th><th>Factor PESTEL</th><th>Factor interno</th><th>Indicador</th><th>Estado</th></tr></thead><tbody>
+  ${E.map(s=>`<tr><td><span class="code">${esc(s.codigo)}</span> ${esc(s.estrategia)}</td>
+   <td><div class="chips">${s.vs.map(v=>`<span class="chip ${v.alerta?"alert":""}">${esc(v.codigo)} ${esc(v.nombre)}</span>`).join("")||"—"}</div></td>
+   <td><div class="chips">${s.ps.map(p=>`<span class="chip">${esc(p.codigo)}</span>`).join("")||"—"}</div></td>
+   <td><div class="chips">${s.fs.map(f=>`<span class="chip">${esc(f.codigo)} ${esc(String(f.factor).slice(0,28))}</span>`).join("")||"—"}</div></td>
+   <td><div class="chips">${s.ks.map(k=>`<span class="chip ${s.rev?"alert":""}">${esc(k.codigo)} ${esc(k.nombre)}</span>`).join("")||"—"}</div></td>
+   <td>${s.rev?'<span class="pill p-bad">En revisión</span>':'<span class="pill p-ok">Vigente</span>'}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Sin decisiones registradas.</div>'}
+  </div>`}
+
+/* Objetivos tomados del documento de sustentación (versión del 20-oct-2026). Cada uno se verifica con evidencias que la app puede contar. */
+const OBJ_GENERAL="Desarrollar y validar un aplicativo —Strategy App— que integre el diagnóstico macroeconómico del entorno, el diagnóstico interno de la organización, la formulación estratégica en una secuencia trazable, y aplicarlo a Procafecol S.A. y a Grupo de Inversiones Suramericana S.A. durante el semestre 2026-2.";
+function objetivos(C){
+  const V=C.V,F=C.F,E=C.E,K=C.K,e=S.emp;
+  const vConSerie=V.filter(v=>(v.serie||[]).length>0),vVer=V.filter(v=>v.verificacion==="verificado");
+  return [
+   {n:1,mod:"Módulo I · Macroeconomía",tab:"entorno",txt:"Identificar y analizar las principales variables macroeconómicas del entorno que inciden en el desempeño de Procafecol S.A. y Grupo de Inversiones Suramericana S.A., mediante el procesamiento de información estadística de fuentes oficiales y el cálculo de su sensibilidad frente a los ingresos de cada empresa, para establecer oportunidades y amenazas.",
+    ev:[["Estados financieros de 3 años completos",C.FX.n>=3&&C.FX.rows.every(r=>FIN_CAMPOS.every(([k])=>num(r[k])!=null)),`${C.FX.n} años`],["Estados financieros que cuadran (activo = pasivo + patrimonio)",C.FX.n>0&&C.FX.rows.every(r=>r.cuadre!=null&&r.cuadre<=.01)],["Al menos 5 variables con serie cargada",vConSerie.length>=5,`${vConSerie.length}`],["Variables con fuente oficial verificada",V.length>0&&vVer.length===V.length,`${vVer.length} de ${V.length}`],["Semáforo de volatilidad calculado en todas las variables con serie",vConSerie.length>0&&vConSerie.every(v=>v.vol),`${vConSerie.filter(v=>v.vol).length} de ${vConSerie.length}`],["Exposición de la empresa calculada en todas las variables con serie",vConSerie.length>0&&vConSerie.every(v=>v.exp),`${vConSerie.filter(v=>v.exp).length} de ${vConSerie.length}`],["Proyecciones 2026–2027 cargadas",V.some(v=>(v.proy||[]).length)],["Cada variable clasificada como oportunidad o amenaza",vConSerie.length>0&&vConSerie.every(v=>v.tipo)]]},
+   {n:2,mod:"Módulo II · Planeación Estratégica (con PESTEL y MEFE del Módulo I)",tab:"interno",txt:"Diagnosticar las condiciones estratégicas internas y externas de las dos organizaciones mediante la aplicación de herramientas de análisis estratégico, incluyendo la cadena de valor, la matriz PESTEL, las matrices MEFI y MEFE, y los modelos ADL y BCG, con el propósito de identificar los factores determinantes de su situación competitiva.",
+    ev:[["Cadena de valor con factores en al menos 4 eslabones",new Set(F.map(f=>f.eslabon)).size>=4,`${new Set(F.map(f=>f.eslabon)).size}`],["PESTEL con al menos 5 factores",C.P.length>=5,`${C.P.length}`],["MEFE calculada",C.mefe!=null,fmt(C.mefe)],["MEFI con pesos que suman 1,00",F.length>0&&Math.abs(C.sumPesoF-1)<=.001,fmt(C.mefi)],["ADL definida",!!(e.adlMadurez&&e.adlPosicion)],["BCG con al menos 2 unidades",C.U.filter(u=>u.cuad).length>=2,`${C.U.length}`],["Conclusiones del diagnóstico redactadas",!!(e.conclusiones&&e.conclusiones.length>40)]]},
+   {n:3,mod:"Aplicativo · trazabilidad",tab:"traza",txt:"Diseñar y desarrollar el aplicativo Strategy App mediante la integración de los módulos de diagnóstico macroeconómico, diagnóstico estratégico y formulación, ejecución y control de la estrategia, incorporando un sistema de trazabilidad que vincule las variables del entorno y los factores internos con las decisiones estratégicas y sus respectivos indicadores de seguimiento.",
+    ev:[["Los tres módulos tienen información",V.length>0&&F.length>0&&E.length>0],["Toda estrategia amarrada a una variable o factor del entorno",E.length>0&&E.every(s=>s.vs.length||s.ps.length),`${E.filter(s=>s.vs.length||s.ps.length).length} de ${E.length}`],["Toda estrategia amarrada a un factor interno",E.length>0&&E.every(s=>s.fs.length),`${E.filter(s=>s.fs.length).length} de ${E.length}`],["Toda estrategia vigilada por al menos un indicador",E.length>0&&E.every(s=>s.ks.length),`${E.filter(s=>s.ks.length).length} de ${E.length}`],["Toda variable con umbral de alerta",V.length>0&&V.every(v=>num(v.umbral)!=null)]]},
+   {n:4,mod:"Módulo III · Gerencia Estratégica",tab:"estrategia",txt:"Formular y documentar planes estratégicos para Procafecol S.A. y Grupo de Inversiones Suramericana S.A., a partir de los resultados de los diagnósticos realizados, estableciendo objetivos estratégicos, tácticas, presupuestos e indicadores de seguimiento que permitan orientar la implementación y el control de las estrategias propuestas.",
+    ev:[["Al menos 3 estrategias con objetivo",E.filter(s=>s.objetivo).length>=3,`${E.filter(s=>s.objetivo).length}`],["Todas con tácticas",E.length>0&&E.every(s=>s.tacticas)],["Todas con presupuesto",E.length>0&&E.every(s=>num(s.presupuesto)!=null),cop(C.presupuesto)],["Indicadores con numerador, denominador, línea base y meta",K.length>0&&K.every(k=>k.numerador&&k.denominador&&num(k.lineaBase)!=null&&num(k.meta)!=null),`${K.length}`],
+     ["Plan de acción: toda táctica con al menos una tarea",E.length>0&&E.every(s=>tacticasDe(s).length&&tacticasDe(s).every(t=>s.ts.some(x=>x.tactica===t))),`${E.reduce((a,s)=>a+tacticasDe(s).filter(t=>s.ts.some(x=>x.tactica===t)).length,0)} de ${E.reduce((a,s)=>a+tacticasDe(s).length,0)}`],
+     ["Tareas con fechas, responsable y recursos",C.T.length>0&&C.T.every(t=>t.completa&&!t.fechaMal),`${C.T.filter(t=>t.completa&&!t.fechaMal).length} de ${C.T.length}`]]}
+  ]}
+function vProyecto(C){
+  const O=objetivos(C);
+  return `${headerEmp(C)}
+  <div class="card"><div class="eyebrow">Objetivo general</div><p style="max-width:90ch;margin:6px 0 0;font-size:15px">${esc(OBJ_GENERAL)}</p></div>
+  <div class="grid2">${O.map(o=>{const ok=o.ev.filter(x=>x[1]).length,tot=o.ev.length,pct=Math.round(ok/tot*100);
+   return `<div class="card"><div class="cardhead"><div><div class="eyebrow">Objetivo específico ${o.n} · ${esc(o.mod)}</div></div><span class="pill ${pct===100?"p-ok":pct>=50?"p-warn":"p-bad"}">${ok} de ${tot} evidencias</span></div>
+    <p style="margin:0 0 10px;max-width:75ch">${esc(o.txt)}</p>
+    <div style="height:6px;border-radius:4px;background:var(--sunk);border:1px solid var(--line);overflow:hidden;margin-bottom:10px"><div style="height:100%;width:${pct}%;background:${pct===100?"var(--ok)":pct>=50?"var(--warn)":"var(--bad)"}"></div></div>
+    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px;font-size:13px">${o.ev.map(([l,c,d])=>`<li class="row" style="gap:8px;flex-wrap:nowrap"><span class="pill ${c?"p-ok":"p-line"}" style="min-width:68px;justify-content:center">${c?"Cumple":"Pendiente"}</span><span style="flex:1">${esc(l)}</span>${d!=null?`<span class="mono muted">${esc(d)}</span>`:""}</li>`).join("")}</ul>
+    <div style="margin-top:10px"><button class="ghost" data-tab="${o.tab}">Ir al módulo →</button></div></div>`}).join("")}</div>
+  <div class="banner">El objetivo general dice <b>desarrollar y validar</b>, pero ningún objetivo específico cubre todavía la validación del aplicativo (juicio de expertos con V de Aiken) ni la ponencia. Conviene agregar un quinto objetivo en el documento.</div>`}
+
+function vMetodo(){
+  return `<div class="card method"><div class="eyebrow">Documentación del procedimiento</div><h1 style="margin:4px 0 10px">Cómo calcula Strategy App</h1>
+  <h3>1. Semáforo de volatilidad</h3><p>Para cada variable se calcula el movimiento de un periodo al siguiente: en puntos porcentuales si ya es una tasa (inflación, tasa de intervención, desempleo, crecimiento del PIB) y en variación % si es un nivel (TRM). Con los últimos 12 movimientos (ventana ajustable) se obtiene el movimiento promedio <code>μ</code> y la desviación estándar <code>σ</code>, que es el "movimiento típico". El último movimiento se compara así: <code>z = (último − μ) / σ</code>. Verde si |z| &lt; 1, amarillo si está entre 1 y 2, rojo si es 2 o más. La volatilidad reciente compara la σ de los últimos 4 movimientos con la de la ventana: por encima de 1,25 veces se marca "en aumento".</p>
+  <h3>2. Exposición con estados financieros simplificados</h3><p>Con seis cifras por año (ingresos, egresos, utilidad neta, activos, pasivos y patrimonio) la app calcula: crecimiento nominal de ingresos; crecimiento real <code>= (1 + nominal) / (1 + inflación de diciembre) − 1</code>; veces que la empresa creció frente a la economía <code>= real / PIB</code>, con el PIB anual aproximado como promedio de los cuatro trimestres; crecimiento de egresos; margen neto <code>= utilidad / ingresos</code>; y endeudamiento <code>= pasivo / activo</code>. La exposición (1 baja, 2 media, 3 alta) se asigna así: PIB por las veces frente a la economía (≥ 1,5 alta; 0,5–1,5 media); inflación según si los ingresos pierden contra la inflación y si los egresos crecen más que los ingresos; tasa de interés por el endeudamiento (más de 60 % alta; 40–60 % media; referencia orientativa); TRM por las respuestas sobre importaciones, exportaciones y deuda en dólares. En una aseguradora el pasivo alto es normal por las reservas técnicas, y una subida de tasas suele favorecer sus inversiones. El equipo puede fijar la exposición a mano con su sustento.</p>
+  <h3>3. Mapa de riesgo, pesos y tipo O/A</h3><p><code>Riesgo = exposición × nivel de volatilidad</code> (de 1 a 9): 6 o más es prioritario, 3–4 se vigila, 1–2 es bajo. <code>Peso MEFE = riesgo / Σ riesgo</code>, de modo que los pesos suman 1 y salen de datos, no de asignación libre. La variable es oportunidad si su último movimiento va en la dirección que favorece a la empresa (por ejemplo, una bajada de tasas para una empresa endeudada) y amenaza en el caso contrario. <code>MEFE = Σ peso × calificación (1–4)</code>. Las proyecciones de organismos y analistas se comparan con el último dato para anticipar si el próximo movimiento sería favorable o desfavorable.</p>
+  <h3>Nivel avanzado: sensibilidad estadística</h3><p>Cuando hay 12 o más trimestres de ingresos, se puede usar la correlación de Pearson entre la variación de cada variable y la de los ingresos (<code>Peso = |r| / Σ|r|</code>, <code>β = cov / var</code>). Con 3 años de cifras anuales no aplica: solo habría dos variaciones. Correlación no implica causalidad.</p>
+  <h3>Conexión del Módulo I con el Módulo II</h3><p>Las seis cifras financieras generan fortalezas y debilidades sugeridas (crecimiento real frente a la economía, costos frente a ingresos, margen, endeudamiento o patrimonio), cada una con su evidencia; el equipo decide si entran a la MEFI. Las variables con exposición media o alta se muestran en el eslabón de la cadena de valor por donde golpean: TRM en abastecimiento, inflación en operaciones, tasa de interés en infraestructura (financiación) y ciclo económico en marketing y ventas. El corte de la BCG es el crecimiento nominal esperado de la economía <code>= (1 + PIB real proyectado) × (1 + inflación esperada) − 1</code>: un mercado es de alto crecimiento si crece más que la economía.</p>
+  <h3>4. MEFI, matriz IE, BCG y ADL</h3><p><code>MEFI = Σ peso × calificación</code>, con pesos asignados por el equipo que deben sumar 1,00. La matriz interna-externa cruza los dos totales con cortes en 2,0 y 3,0. En la BCG, el cuadrante sale del crecimiento del mercado frente al corte definido y de la participación relativa frente a 1,0. La ADL ubica la zona orientativa según madurez del sector y posición competitiva.</p>
+  <h3>5. Regla de trazabilidad y alerta</h3><p>Una variable entra en alerta cuando su semáforo de volatilidad está en rojo, o cuando supera el umbral manual si el equipo lo definió. Esto aplica también a los movimientos simulados; toda estrategia vinculada a ella queda <b>en revisión</b>, y también los indicadores que la vigilan. Cumplimiento de indicador: <code>(medido − base) / (meta − base)</code>, que funciona igual para indicadores que deben subir o bajar. Semáforo: rojo de 0 % a 59 % (lejos de la meta), amarillo de 60 % a 95 %, verde por encima de 95 %.</p>
+  <h3>6. Plan de acción y alcance</h3><p>El plan de acción toma el objetivo y la estrategia de lo formulado, y las tácticas de cada estrategia (una por línea). Las tareas, fechas de inicio y cierre, responsables y recursos se registran a mano. La app avisa si una fecha de cierre es anterior al inicio, si una tarea sale del plazo de su estrategia o si una táctica fue modificada y dejó tareas sin asignar. El Módulo III llega hasta la formulación; no gestiona la ejecución.</p>
+  <h3>7. Fuentes</h3><p>Entorno: DANE, Banco de la República y DIAN. Empresas: informes de gestión, de sostenibilidad y estados financieros publicados. Cada serie registra fuente, corte, frecuencia y fecha de consulta. Solo información pública.</p>
+  <h3>Limitaciones</h3><ul><li>Dos casos no permiten generalizar; ponen a prueba la estructura del artefacto.</li><li>El diagnóstico interno depende de lo que las empresas eligen publicar.</li><li>Las series ilustrativas deben reemplazarse por cifras oficiales antes de reportar hallazgos.</li></ul></div>`}
+
+/* ---------- formularios ---------- */
+const optsV=()=>[...S.d.variables].sort(byCode).map(v=>[v.id,v.codigo+" · "+v.nombre]);
+const optsP=()=>[...S.d.pestel].sort(byCode).map(p=>[p.id,p.codigo+" · "+p.factor]);
+const optsF=()=>[...S.d.internos].sort(byCode).map(f=>[f.id,f.codigo+" · "+f.factor]);
+const optsE=()=>[["","Sin vincular"],...[...S.d.estrategias].sort(byCode).map(s=>[s.id,s.codigo+" · "+s.estrategia])];
+const VERIF=[["verificado","Fuente oficial verificada"],["por_verificar","POR VERIFICAR"],["ilustrativo","Ilustrativo (no oficial)"]];
+const SCHEMA={
+ empresa:{title:"Datos de la empresa",f:[["nombre","Nombre","text",{req:1}],["razon","Razón social","text"],["sector","Sector","text"],["comparacion","Base de comparación","select",{o:[["anual","Anual (mismo trimestre año anterior)"],["trimestral","Trimestral (trimestre anterior)"]]}],
+  ["ingresosNombre","Serie de ingresos · nombre y unidad","text"],["ingresosFuente","Fuente de los ingresos","text"],["ingresos","Serie de ingresos","serie",{full:1}],
+  ["tipoEmpresa","Tipo de empresa","select",{o:[["comercial","Comercial / de consumo"],["aseguradora","Aseguradora"]]}],["metodoPeso","Método de pesos MEFE","select",{o:[["exposicion","Exposición × volatilidad (recomendado)"],["correlacion","Correlación con ingresos (avanzado, ≥ 12 trimestres)"]]}],
+  ["importa","¿Importa insumos o productos?","select",{o:[["nsa","Sin dato"],["si","Sí"],["no","No"]]}],["exporta","¿Vende en el exterior?","select",{o:[["nsa","Sin dato"],["si","Sí"],["no","No"]]}],
+  ["deudaUSD","¿Tiene deuda en dólares?","select",{o:[["nsa","Sin dato"],["si","Sí"],["no","No"]]}],["finUnidad","Unidad de los estados financieros","text"],
+  ["dolarNota","Sustento de las respuestas sobre dólares (informe y página)","textarea",{full:1}],
+  ["adlMadurez","ADL · madurez del sector","select",{o:[["","—"],...ADL_M]}],["adlPosicion","ADL · posición competitiva","select",{o:[["","—"],...ADL_P]}],["bcgCorteModo","BCG · corte de crecimiento","select",{o:[["auto","Automático: crecimiento nominal esperado de la economía"],["manual","Manual (valor de abajo)"]]}],["bcgCorte","BCG · corte manual (%)","number"],
+  ["conclusiones","Conclusiones del diagnóstico","textarea",{full:1}],["notaDatos","Nota sobre los datos","textarea",{full:1}],["ilustrativo","La empresa contiene datos ilustrativos","check",{full:1}]]},
+ variables:{title:"Variable macroeconómica",f:[["nombre","Variable","text",{req:1}],["fuente","Entidad fuente","select",{o:[["DANE","DANE"],["Banco de la República","Banco de la República"],["DIAN","DIAN"],["Fedesarrollo","Fedesarrollo"],["Otra","Otra"]]}],
+  ["serieNombre","Nombre exacto de la serie","text",{full:1}],["frecuencia","Frecuencia","select",{o:[["Trimestral","Trimestral"],["Mensual (cierre de trimestre)","Mensual (cierre de trimestre)"],["Mensual (promedio trimestral)","Mensual (promedio trimestral)"]]}],
+  ["transformacion","Tipo de serie","select",{o:[["pct","Nivel → variación %"],["diff","Tasa → diferencia en pp"],["raw","Ya es variación % (se usa tal cual)"]]}],["corte","Corte de la serie","text"],["fechaConsulta","Fecha de consulta","date"],
+  ["url","Enlace de la fuente","text",{full:1}],["serie","Serie de datos","serie",{full:1}],
+  ["canal","Canal de impacto","select",{o:CANALES}],["efectoSubida","Si la variable sube, para la empresa es…","select",{o:[["auto","Automático según canal y tipo de empresa"],["favorable","Favorable"],["desfavorable","Desfavorable"]]}],
+  ["exposicionManual","Exposición","select",{o:[["auto","Automática (estados financieros)"],["1","1 · Baja"],["2","2 · Media"],["3","3 · Alta"]]}],["ventana","Ventana de volatilidad (periodos)","number"],
+  ["exposicionNota","Sustento si la exposición se fija a mano","textarea",{full:1}],
+  ["proy","Proyecciones","proy",{full:1}],
+  ["umbral","Umbral manual (opcional; vacío = usa la volatilidad)","number"],["calificacion","Calificación MEFE (1–4)","select",{o:[["","—"],["1","1 · respuesta deficiente"],["2","2 · respuesta promedio"],["3","3 · respuesta superior al promedio"],["4","4 · respuesta superior"]]}],
+  ["tipoManual","Oportunidad / amenaza","select",{o:[["auto","Automático según datos"],["O","Fijar como oportunidad"],["A","Fijar como amenaza"]]}],["verificacion","Estado del dato","select",{o:VERIF}],["lectura","Lectura del factor (cómo afecta a la empresa)","textarea",{full:1}]]},
+ pestel:{title:"Factor PESTEL",f:[["dimension","Dimensión","select",{o:PESTEL}],["tipo","Tipo","select",{o:[["O","Oportunidad"],["A","Amenaza"]]}],["factor","Factor","textarea",{full:1,req:1}],["impacto","Impacto (1–5)","number"],["fuente","Fuente pública","text"]]},
+ internos:{title:"Factor interno",f:[["tipo","Tipo","select",{o:[["F","Fortaleza"],["D","Debilidad"]]}],["eslabon","Eslabón de la cadena de valor","select",{o:[...ESLABONES,...APOYO]}],["factor","Factor","textarea",{full:1,req:1}],
+  ["peso","Peso MEFI (0–1)","number"],["calificacion","Calificación (1–4)","select",{o:[["","—"],["1","1 · debilidad mayor"],["2","2 · debilidad menor"],["3","3 · fortaleza menor"],["4","4 · fortaleza mayor"]]}],["evidencia","Evidencia y fuente pública","textarea",{full:1}]]},
+ unidades:{title:"Unidad de negocio (BCG)",f:[["nombre","Unidad de negocio","text",{req:1}],["crecimiento","Crecimiento del mercado (%)","number"],["participacion","Participación relativa (vs. líder)","number"],["ventas","Tamaño relativo (ventas o índice)","number"],["verificacion","Estado del dato","select",{o:VERIF}],["fuente","Fuente","text",{full:1}]]},
+ estrategias:{title:"Estrategia",f:[["objetivo","Objetivo estratégico","textarea",{full:1,req:1}],["estrategia","Estrategia","text",{full:1,req:1}],["tipo","Tipo de estrategia","select",{o:[["Intensiva","Intensiva"],["Integración","Integración"],["Diversificación","Diversificación"],["Defensiva","Defensiva"],["Competitiva","Competitiva"]]}],["responsable","Responsable","text"],
+  ["tacticas","Tácticas (una por línea)","textarea",{full:1}],["presupuesto","Presupuesto (COP)","number"],["inicio","Inicio","date"],["fin","Fin","date"],
+  ["variables","Variables del entorno que la originan","multi",{full:1,o:optsV}],["externos","Factores PESTEL relacionados","multi",{full:1,o:optsP}],["factores","Factores internos que la originan","multi",{full:1,o:optsF}]]},
+ kpis:{title:"Indicador",f:[["nombre","Indicador","text",{full:1,req:1}],["estrategia","Estrategia que vigila","select",{o:optsE}],["frecuencia","Frecuencia","select",{o:[["Mensual","Mensual"],["Trimestral","Trimestral"],["Semestral","Semestral"],["Anual","Anual"]]}],
+  ["numerador","Numerador","text"],["denominador","Denominador","text"],["unidad","Unidad","text"],["fuente","Fuente del dato","text"],["lineaBase","Línea base","number"],["meta","Meta","number"],["actual","Valor medido (opcional; ilustra el control)","number"]]},
+ tareas:{title:"Tarea del plan de acción",f:[["estrategia","Estrategia","select",{o:()=>[...S.d.estrategias].sort(byCode).map(s=>[s.id,s.codigo+" · "+s.estrategia]),req:1}],["tactica","Táctica","select",{o:()=>[],req:1}],
+  ["tarea","Tarea","textarea",{full:1,req:1}],["inicio","Fecha de inicio","date",{req:1}],["fin","Fecha de cierre","date",{req:1}],["responsable","Responsable (cargo o área)","text",{req:1}],["recursos","Recursos (humanos, tecnológicos, financieros)","textarea",{full:1,req:1}]]}
+};
+function fillTacticas(sel){const s=S.d.estrategias.find(x=>x.id===$("#f_estrategia").value);const el=$("#f_tactica");if(!el)return;
+  const ts=tacticasDe(s);el.innerHTML=ts.length?ts.map(t=>`<option value="${esc(t)}" ${t===sel?"selected":""}>${esc(t)}</option>`).join(""):'<option value="">La estrategia no tiene tácticas</option>';
+  if(sel&&!ts.includes(sel))el.insertAdjacentHTML("afterbegin",`<option value="${esc(sel)}" selected>${esc(sel)} (ya no existe en la estrategia)</option>`)}
+let M=null;
+// Campos que el estudiante normalmente no toca: quedan en "Opciones avanzadas"
+const ADV={empresa:["comparacion","metodoPeso","bcgCorteModo","bcgCorte","finUnidad","notaDatos","ilustrativo","ingresosNombre","ingresosFuente","ingresos"],
+ variables:["transformacion","canal","efectoSubida","exposicionManual","ventana","exposicionNota","proy","umbral","tipoManual","frecuencia","url"],
+ kpis:["frecuencia","fuente"],unidades:["verificacion","fuente"]};
+function openForm(kind,id,pre){
+  const sc=SCHEMA[kind];const isEmp=kind==="empresa";const isNewEmp=isEmp&&id==="__new";
+  const cur=isEmp?(isNewEmp?{comparacion:"anual",bcgCorte:10,bcgCorteModo:"auto",tipoEmpresa:"comercial",metodoPeso:"exposicion"}:{...S.emp}):(id?{...(S.d[kind].find(x=>x.id===id)||{})}:{...(pre||{})});
+  if(!isEmp&&!id){if(kind==="variables"){cur.transformacion="pct";cur.fechaConsulta=today();cur.verificacion="por_verificar";cur.tipoManual="auto"}}
+  M={kind,id,isNewEmp,cur,confirmDel:false};
+  const field=([k,l,t,o={}])=>{const v=cur[k];const cls=(o.full||t==="textarea"||t==="serie"||t==="multi")?"full":"";
+    if(t==="check")return `<label class="full chk"><input type="checkbox" id="f_${k}" ${v?"checked":""}> ${l}</label>`;
+    let inp;if(t==="select"){const os=typeof o.o==="function"?o.o():o.o;inp=`<select id="f_${k}">${os.map(([a,b])=>`<option value="${esc(a)}" ${String(v??"")===String(a)?"selected":""}>${esc(b)}</option>`).join("")}</select>`}
+    else if(t==="textarea")inp=`<textarea id="f_${k}">${esc(v)}</textarea>`;
+    else if(t==="serie")inp=`<textarea id="f_${k}" class="mono" style="min-height:130px" placeholder="2024-T1;123,4">${esc(serieTxt(v))}</textarea><span class="hint">Una observación por línea: periodo;valor (por ejemplo 2024-T1;5,5). Puedes pegar dos columnas desde Excel.</span>`;
+    else if(t==="proy")inp=`<textarea id="f_${k}" class="mono" style="min-height:110px" placeholder="FMI;oct-2026;Cierre 2026;2,2;anual;WEO octubre">${esc((v||[]).map(p=>[p.org,p.fecha,p.horizonte,p.valor,p.tipo,p.nota].join(";")).join("\n"))}</textarea><span class="hint">Una por línea: fuente;fecha de publicación;horizonte (ej. Cierre 2026);valor;tipo (cierre, anual o promedio);nota</span>`;
+    else if(t==="multi"){const os=o.o();const sel=new Set(v||[]);inp=os.length?`<div class="multi" id="f_${k}">${os.map(([a,b])=>`<label><input type="checkbox" value="${esc(a)}" ${sel.has(a)?"checked":""}> ${esc(b)}</label>`).join("")}</div>`:'<span class="hint">Aún no hay elementos para vincular.</span>'}
+    else inp=`<input id="f_${k}" type="${t==="number"?"number":t==="date"?"date":"text"}" ${t==="number"?'step="any"':""} value="${esc(v)}">`;
+    return `<label class="${cls}">${l}${o.req?" *":""}${inp}</label>`};
+  $("#modal").innerHTML=`<form class="dlg" id="frm" novalidate><div class="row"><div><div class="eyebrow">${isNewEmp?"Nueva empresa":(cur.codigo?esc(cur.codigo):(id?"Editar":"Nuevo registro"))}</div><h2>${sc.title}</h2></div><div class="spacer"></div><button type="button" class="ghost" data-act="close">Cerrar</button></div>
+   <div class="form">${sc.f.filter(f=>!(ADV[kind]||[]).includes(f[0])).map(field).join("")}</div>
+   ${sc.f.some(f=>(ADV[kind]||[]).includes(f[0]))?`<details class="advf"><summary>Opciones avanzadas <span class="muted">(normalmente no hay que tocarlas)</span></summary><div class="form" style="margin-top:10px">${sc.f.filter(f=>(ADV[kind]||[]).includes(f[0])).map(field).join("")}</div></details>`:""}<div id="frmErr" class="muted" style="color:var(--bad)"></div>
+   ${cur.editadoEn?`<div class="muted" style="font-size:12px" id="frmEd">Última edición: <b>${esc(quien(cur.editadoPor))}</b> · ${esc(hace(cur.editadoEn))}</div>`:""}
+   <div class="row">${(!isEmp&&id&&S.canWrite)?'<button type="button" class="danger" id="btnDel">Eliminar</button>':""}<div class="spacer"></div><button type="button" data-act="close">Cancelar</button>${S.canWrite?'<button type="submit" class="pri">Guardar</button>':""}</div></form>`;
+  $("#modal").hidden=false;
+  if(kind==="tareas"){fillTacticas(cur.tactica);$("#f_estrategia").addEventListener("change",()=>fillTacticas(""))}
+  setTimeout(()=>{const f=$("#frm input,#frm textarea,#frm select");f&&f.focus()},30);
+}
+function readForm(){const sc=SCHEMA[M.kind],o={};
+  for(const [k,l,t,opt={}] of sc.f){const el=document.getElementById("f_"+k);if(!el){if(t==="multi")o[k]=M.cur[k]||[];continue}
+    if(t==="check")o[k]=el.checked;else if(t==="serie")o[k]=parseSerie(el.value);
+    else if(t==="proy"){const old=M.cur[k]||[];o[k]=el.value.split(/\n+/).map(l=>l.split(";").map(x=>x.trim())).filter(a=>a.length>=4&&a[0]).map(a=>{const prev=old.find(p=>p.org===a[0]&&String(p.horizonte)===a[2]);const val=Number(String(a[3]).replace(/\./g,a[3].includes(",")?"":".").replace(",","."));return{org:a[0],fecha:a[1],horizonte:a[2],valor:isFinite(val)?val:null,tipo:a[4]||"cierre",nota:a[5]||"",url:prev?prev.url||"":""}})}else if(t==="multi")o[k]=[...el.querySelectorAll("input:checked")].map(i=>i.value);
+    else if(t==="number")o[k]=el.value===""?null:Number(el.value);else o[k]=el.value.trim();
+    if(opt.req&&(o[k]===""||o[k]==null))return{err:`Completa el campo "${l}".`}}
+  return{o}}
+function nextCode(kind){const p=PREFIX[kind];const mx=S.d[kind].reduce((a,x)=>{const m=String(x.codigo||"").match(/(\d+)$/);return m?Math.max(a,+m[1]):a},0);return p+"-"+String(mx+1).padStart(2,"0")}
+async function saveForm(){
+  const r=readForm();if(r.err){$("#frmErr").textContent=r.err;return}
+  if(r.o.inicio&&r.o.fin&&r.o.fin<r.o.inicio){$("#frmErr").textContent="La fecha de cierre no puede ser anterior a la fecha de inicio.";return}
+  const btn=$("#frm button[type=submit]");btn.disabled=true;
+  try{
+    if(M.kind==="empresa"){
+      if(M.isNewEmp){const slug=(r.o.nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,30)||"empresa")+"-"+Math.random().toString(36).slice(2,6);
+        await S.db.doc("empresas/"+slug).set({...r.o,creada:today()});closeModal();selectEmp(slug);toast("Empresa creada")}
+      else{const base={...S.emp};delete base.id;await S.db.doc("empresas/"+S.eid).set({...base,...r.o,editadoPor:S.uid||null,editadoEn:new Date().toISOString()});closeModal();toast("Datos guardados");logAct("actualizó","empresa","","")}
+    }else{
+      const id=M.id||S.db.collection(`empresas/${S.eid}/${M.kind}`).doc().id;
+      const body={...M.cur,...r.o,codigo:M.cur.codigo||nextCode(M.kind),editadoPor:S.uid||null,editadoEn:new Date().toISOString()};delete body.id;
+      const nuevo=!M.id,kind=M.kind;
+      await S.db.doc(`empresas/${S.eid}/${M.kind}/${id}`).set(body);closeModal();toast(`${body.codigo} guardado`);
+      logAct(nuevo?"agregó":"editó",kind,body.codigo,body.nombre||body.factor||body.estrategia||body.tarea||"")}
+  }catch(e){btn.disabled=false;$("#frmErr").textContent=e&&e.code==="invalid_argument"?"No tienes permiso de edición en este proyecto, o el registro no es válido.":"No se pudo guardar. Intenta de nuevo en unos segundos."}
+}
+async function delItem(){
+  if(!M.confirmDel){M.confirmDel=true;const b=$("#btnDel");b.textContent="Confirmar eliminación";b.classList.add("pri");return}
+  try{const cod=M.cur.codigo,kd=M.kind;await S.db.doc(`empresas/${S.eid}/${M.kind}/${M.id}`).delete();logAct("eliminó",kd,cod,M.cur.nombre||M.cur.factor||M.cur.estrategia||M.cur.tarea||"");
+    // limpiar vínculos en estrategias e indicadores
+    if(["variables","pestel","internos"].includes(M.kind)){const key=M.kind==="variables"?"variables":M.kind==="pestel"?"externos":"factores";
+      for(const s of S.d.estrategias){if((s[key]||[]).includes(M.id)){const b={...s,[key]:s[key].filter(x=>x!==M.id)};delete b.id;await S.db.doc(`empresas/${S.eid}/estrategias/${s.id}`).set(b)}}}
+    if(M.kind==="estrategias"){for(const t of S.d.tareas.filter(x=>x.estrategia===M.id))await S.db.doc(`empresas/${S.eid}/tareas/${t.id}`).delete();
+      for(const k of S.d.kpis){if(k.estrategia===M.id){const b={...k,estrategia:""};delete b.id;await S.db.doc(`empresas/${S.eid}/kpis/${k.id}`).set(b)}}}
+    closeModal();toast("Registro eliminado")}catch(e){$("#frmErr").textContent="No se pudo eliminar."}
+}
+const FIN_CAMPOS=[["ingresos","Ingresos"],["egresos","Egresos (costos y gastos)"],["utilidad","Utilidad neta"],["activos","Activos"],["pasivos","Pasivos"],["patrimonio","Patrimonio"]];
+function openFin(){
+  const e=S.emp;let R=[...(e.financieros||[])].sort((a,b)=>num(a.anio)-num(b.anio));
+  if(!R.length){const y=new Date().getFullYear();R=[y-3,y-2,y-1].map(a=>({anio:a}))}while(R.length<3)R.unshift({anio:num(R[0].anio)-1});
+  M={kind:"financieros",cur:{},R};
+  $("#modal").innerHTML=`<form class="dlg" id="frmFin" novalidate><div class="row"><div><div class="eyebrow">Módulo I · ${esc(e.nombre)}</div><h2>Estados financieros simplificados</h2></div><div class="spacer"></div><button type="button" class="ghost" data-act="close">Cerrar</button></div>
+   <p class="muted" style="margin:0;font-size:13px">Escribe las cifras sin puntos de miles y en la misma unidad para los tres años (${esc(e.finUnidad||"millones de COP")}). Para egresos, usa el total de costos y gastos del estado de resultados.</p>
+   <div class="tbl"><table><thead><tr><th>Concepto</th>${R.map((r,i)=>`<th><input id="fy_${i}" type="number" value="${esc(r.anio)}" style="width:90px" aria-label="Año ${i+1}"></th>`).join("")}</tr></thead><tbody>
+   ${FIN_CAMPOS.map(([k,l])=>`<tr><td>${l}</td>${R.map((r,i)=>`<td><input id="fv_${i}_${k}" type="number" step="any" value="${esc(r[k]??"")}" style="width:120px" aria-label="${l} ${esc(r.anio)}"></td>`).join("")}</tr>`).join("")}
+   <tr><td>Fuente (informe y página)</td>${R.map((r,i)=>`<td><input id="fv_${i}_fuente" type="text" value="${esc(r.fuente||"")}" style="width:140px"></td>`).join("")}</tr></tbody></table></div>
+   <label class="row" style="gap:6px;font-size:13px"><input type="checkbox" id="fv_ilu" ${R.some(r=>r.verificacion==="ilustrativo")?"checked":""}> Cifras ilustrativas (no tomadas aún del informe)</label>
+   <div id="frmErr" class="muted" style="color:var(--bad)"></div>
+   <div class="row"><div class="spacer"></div><button type="button" data-act="close">Cancelar</button>${S.canWrite?'<button type="submit" class="pri">Guardar cifras</button>':""}</div></form>`;
+  $("#modal").hidden=false}
+async function saveFin(){
+  const R=M.R.map((r,i)=>{const o={anio:num($("#fy_"+i).value),fuente:$("#fv_"+i+"_fuente").value.trim(),verificacion:$("#fv_ilu").checked?"ilustrativo":"empresa"};FIN_CAMPOS.forEach(([k])=>o[k]=num($(`#fv_${i}_${k}`).value));return o}).filter(r=>r.anio!=null);
+  if(new Set(R.map(r=>r.anio)).size!==R.length){$("#frmErr").textContent="Hay años repetidos.";return}
+  try{const base={...S.emp};delete base.id;await S.db.doc("empresas/"+S.eid).set({...base,financieros:R,editadoPor:S.uid||null,editadoEn:new Date().toISOString()});closeModal();toast("Estados financieros guardados");logAct("actualizó","financieros","",R.map(r=>r.anio).join(", "))}catch(e){$("#frmErr").textContent="No se pudo guardar."}}
+function closeModal(){$("#modal").hidden=true;$("#modal").innerHTML="";M=null}
+
+/* ---------- render y datos ---------- */
+function renderTabs(){const main=FLOW.some(f=>f[0]===S.tab);const sec=TABS.find(t=>t[0]===S.tab);
+  $("#tabs").innerHTML=FLOW.map(([k,l,a],i)=>`<button role="tab" data-tab="${k}" aria-selected="${S.tab===k}"><span class="tn">${i+1}</span><span class="tl">${l}<small>${a}</small></span></button>`).join("")+`<button role="tab" data-act="menu" aria-selected="${!main}" class="tmore"><span class="tl">${main?"Más":esc(sec?sec[1]:"Más")}<small>${main?"Menú":"Otras vistas"}</small></span></button>`}
+function render(){
+  const v=$("#view");
+  try{renderInner(v)}catch(err){console.error(err);v.innerHTML=`<div class="empty"><h2 style="margin-bottom:6px">Esta vista no se pudo dibujar</h2><p>Revisa el último dato cargado; puede tener un formato inesperado. Detalle: ${esc(err&&err.message||err)}</p></div>`}
+}
+function renderInner(v){
+  renderTabs();
+  if(!S.db){v.innerHTML='<div class="empty">No fue posible conectar la base de datos compartida en esta vista. Abre la app desde claude.ai con una sesión iniciada.</div>';return}
+  if(!S.empresas.length){v.innerHTML=`<div class="empty"><h2 style="margin-bottom:6px">Aún no hay empresas en el proyecto</h2><p>Crea la primera empresa para empezar el diagnóstico.</p><button class="pri" data-act="newEmp">Nueva empresa</button></div>`;return}
+  if(!S.emp){v.innerHTML='<div class="empty">Cargando empresa…</div>';return}
+  if(S.tab!=="guia"&&!S.guiaVista&&!S.asig&&!S.welcomeSkip){v.innerHTML=vGuia();return}
+  if(S.tab!=="guia"&&!S.asig&&!S.welcomeSkip){v.innerHTML=vBienvenida();return}
+  if(FLOW.some(f=>f[0]===S.tab))S.lastMain=S.tab;
+  if(S.tab==="metodo"){v.innerHTML=vMetodo()+navFooter();return}
+  const C=compute();
+  v.innerHTML=(({guia:vGuia,entradas:vEntradas,sintesis:vSintesis,proyecto:vProyecto,tablero:vTablero,entorno:vEntorno,interno:vInterno,estrategia:vEstrategia,traza:vTraza})[S.tab](C))+navFooter();
+}
+let rT=null;const schedule=()=>{clearTimeout(rT);rT=setTimeout(render,40)};
+function renderEmpSel(){const sel=$("#empSel");sel.innerHTML=S.empresas.length?S.empresas.map(e=>`<option value="${esc(e.id)}" ${e.id===S.eid?"selected":""}>${esc(e.nombre||e.id)}</option>`).join(""):'<option value="">Sin empresas</option>'}
+function selectEmp(eid){
+  S.subs.forEach(u=>{try{u()}catch(e){}});S.subs=[];S.eid=eid;S.emp=null;COLS.forEach(c=>S.d[c]=[]);S.sim={vid:"",shock:""};S.focusE=null;
+  try{localStorage.setItem("sa_emp",eid)}catch(e){}
+  renderEmpSel();if(!eid){render();return}
+  const onErr=e=>{if(e&&e.code==="revoked"){S.db=null;render()}};
+  S.subs.push(S.db.doc("empresas/"+eid).onSnapshot(s=>{if(S.eid!==eid)return;S.emp=s.exists?{id:s.id,...s.data()}:null;schedule()},onErr));
+  S.act=[];S.subs.push(S.db.collection(`empresas/${eid}/actividad`).orderBy("cuando","desc").limit(20).onSnapshot(q=>{if(S.eid!==eid)return;S.act=q.docs.map(d=>({id:d.id,...d.data()}));resolverNombres([...new Set(S.act.map(a=>a.quien))]);schedule()},()=>{}));
+  COLS.forEach(c=>S.subs.push(S.db.collection(`empresas/${eid}/${c}`).onSnapshot(q=>{if(S.eid!==eid)return;S.d[c]=q.docs.map(d=>({id:d.id,...d.data()}));schedule()},onErr)));
+  render();
+}
+async function exportar(){
+  if(!S.dl||!S.emp)return;const C=compute();
+  const rows=[["Decisión","Estrategia","Variables","Factores PESTEL","Factores internos","Indicadores","Estado"]];
+  C.E.sort(byCode).forEach(s=>rows.push([s.codigo,s.estrategia,s.vs.map(v=>v.codigo+" "+v.nombre).join(" | "),s.ps.map(p=>p.codigo).join(" | "),s.fs.map(f=>f.codigo+" "+f.factor).join(" | "),s.ks.map(k=>k.codigo+" "+k.nombre).join(" | "),s.rev?"En revisión":"Vigente"]));
+  const csv="﻿"+rows.map(r=>r.map(x=>'"'+String(x??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
+  try{await S.dl.save({filename:`trazabilidad-${S.eid}.csv`,data:csv});toast("Registro exportado")}catch(e){if(e&&e.code!=="declined")toast("No se pudo exportar en esta vista")}
+}
+
+async function exportPlan(){
+  if(!S.dl||!S.emp)return;const C=compute();const rows=[["Objetivo estratégico","Estrategia","Táctica","Código tarea","Tarea","Fecha de inicio","Fecha de cierre","Responsable","Recursos"]];
+  [...C.E].sort(byCode).forEach(s=>{const tacs=tacticasDe(s);if(!tacs.length)rows.push([s.objetivo,s.codigo+" "+s.estrategia,"","","","","","",""]);
+    tacs.forEach(tc=>{const ts=s.ts.filter(x=>x.tactica===tc);if(!ts.length)rows.push([s.objetivo,s.codigo+" "+s.estrategia,tc,"","","","","",""]);
+      ts.forEach(x=>rows.push([s.objetivo,s.codigo+" "+s.estrategia,tc,x.codigo,x.tarea,x.inicio,x.fin,x.responsable,x.recursos]))})});
+  const csv="﻿"+rows.map(r=>r.map(x=>'"'+String(x??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
+  try{await S.dl.save({filename:`plan-de-accion-${S.eid}.csv`,data:csv});toast("Plan de acción exportado")}catch(e){if(e&&e.code!=="declined")toast("No se pudo exportar en esta vista")}
+}
+/* ---------- Navegación entre módulos ---------- */
+function navFooter(){const i=FLOW.findIndex(t=>t[0]===S.tab);
+  if(i<0)return `<nav class="pnav"><button data-tab="${S.lastMain||"entorno"}"><small>← Volver</small><b>a los pasos</b></button><span></span></nav>`;
+  const p=FLOW[i-1],n=FLOW[i+1];return `<nav class="pnav" aria-label="Navegación entre pasos">${p?`<button data-tab="${p[0]}"><small>← Paso ${i}</small><b>${esc(p[1])}</b></button>`:"<span></span>"}${n?`<button data-tab="${n[0]}" class="nx"><small>Paso ${i+2} →</small><b>${esc(n[1])}</b></button>`:"<span></span>"}</nav>`}
+
+/* ---------- Copias guardadas (versiones de los datos de una empresa) ---------- */
+const VERS_COLS=COLS;
+async function abrirCopias(){
+  if(!S.db||!S.emp)return;M={kind:"copias"};
+  $("#modal").innerHTML=`<div class="dlg"><div class="row"><div><div class="eyebrow">${esc(S.emp.nombre)}</div><h2>Copias guardadas</h2></div><div class="spacer"></div><button type="button" class="ghost" data-act="close">Cerrar</button></div>
+   <p class="muted" style="margin:0;font-size:13px">Una copia guarda todos los datos de esta empresa tal como están ahora: cifras, variables, matrices, estrategias, tareas e indicadores. Sirve para conservar un avance (por ejemplo, "entrega corte 2") y volver a él si algo se daña.</p>
+   ${S.canWrite?`<div class="row"><input id="copiaNom" type="text" placeholder="Nombre de la copia, ej. Entrega corte 2" style="flex:1;min-width:200px"><button class="pri" data-act="guardarCopia">Guardar copia</button></div>`:""}
+   <div id="copiasList"><div class="muted">Cargando copias…</div></div><div id="frmErr" class="muted" style="color:var(--bad)"></div></div>`;
+  $("#modal").hidden=false;listarCopias()}
+async function listarCopias(){
+  try{const q=await S.db.collection(`empresas/${S.eid}/versiones`).get();const L=q.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+   const el=$("#copiasList");if(!el)return;
+   el.innerHTML=L.length?`<div class="tbl"><table><thead><tr><th>Copia</th><th>Fecha</th><th class="n">Registros</th><th></th></tr></thead><tbody>${L.map(c=>`<tr><td><b>${esc(c.nombre||"Sin nombre")}</b></td><td class="mono">${esc(String(c.fecha||"").replace("T"," ").slice(0,16))}</td><td class="n">${VERS_COLS.reduce((a,k)=>a+((c.cols||{})[k]||[]).length,0)}</td><td style="white-space:nowrap">${S.canWrite?`<button data-restaurar="${esc(c.id)}">Restaurar</button> <button class="ghost" data-borrarcopia="${esc(c.id)}">Eliminar</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Aún no hay copias guardadas de esta empresa.</div>'}
+  catch(e){const el=$("#copiasList");if(el)el.innerHTML='<div class="empty">No se pudieron leer las copias.</div>'}}
+function snapshot(nombre){const emp={...S.emp};delete emp.id;const cols={};VERS_COLS.forEach(k=>cols[k]=S.d[k].map(x=>({...x})));return{nombre,fecha:new Date().toISOString(),empresa:emp,cols}}
+async function guardarCopia(){
+  const nom=($("#copiaNom").value||"").trim()||("Copia "+new Date().toLocaleString("es-CO"));
+  try{const ref=S.db.collection(`empresas/${S.eid}/versiones`).doc();await ref.set(snapshot(nom));$("#copiaNom").value="";toast("Copia guardada");logAct("guardó","copia","",nom);listarCopias()}
+  catch(e){$("#frmErr").textContent=e&&e.code==="invalid_argument"?"La copia es demasiado grande o no tienes permiso de edición.":"No se pudo guardar la copia."}}
+let confirmRest=null;
+async function restaurarCopia(id,btn){
+  if(confirmRest!==id){confirmRest=id;btn.textContent="Confirmar: reemplaza los datos actuales";btn.classList.add("pri");return}
+  confirmRest=null;btn.disabled=true;btn.textContent="Restaurando…";
+  try{const snap=await S.db.doc(`empresas/${S.eid}/versiones/${id}`).get();const c=snap.data();if(!c)throw 0;
+   // copia de seguridad automática del estado actual antes de restaurar
+   await S.db.collection(`empresas/${S.eid}/versiones`).doc().set(snapshot("Automática antes de restaurar «"+(c.nombre||"")+"»"));
+   const jobs=[];
+   VERS_COLS.forEach(k=>{const keep=new Set((c.cols[k]||[]).map(x=>x.id));
+     S.d[k].filter(x=>!keep.has(x.id)).forEach(x=>jobs.push(()=>S.db.doc(`empresas/${S.eid}/${k}/${x.id}`).delete()));
+     (c.cols[k]||[]).forEach(x=>{const b={...x};delete b.id;jobs.push(()=>S.db.doc(`empresas/${S.eid}/${k}/${x.id}`).set(b))})});
+   for(let i=0;i<jobs.length;i+=8)await Promise.all(jobs.slice(i,i+8).map(f=>f()));
+   await S.db.doc("empresas/"+S.eid).set(c.empresa);
+   closeModal();toast("Copia restaurada. Se guardó una copia automática del estado anterior.");logAct("restauró","copia","",c.nombre||"")}
+  catch(e){btn.disabled=false;btn.textContent="Restaurar";$("#frmErr").textContent="No se pudo restaurar la copia."}}
+async function borrarCopia(id,btn){if(btn.dataset.ok!=="1"){btn.dataset.ok="1";btn.textContent="Confirmar eliminar";return}
+  try{await S.db.doc(`empresas/${S.eid}/versiones/${id}`).delete();listarCopias()}catch(e){$("#frmErr").textContent="No se pudo eliminar."}}
+
+/* ---------- Exportar ---------- */
+function abrirExportar(){
+  M={kind:"exportar"};
+  $("#modal").innerHTML=`<div class="dlg"><div class="row"><div><div class="eyebrow">${esc(S.emp.nombre)}</div><h2>Exportar</h2></div><div class="spacer"></div><button type="button" class="ghost" data-act="close">Cerrar</button></div>
+  <div class="explist">
+   <button data-exp="pdf"><b>Informe completo en PDF</b><span>Síntesis, lecturas de los tres módulos, matrices, gráficas, plan de acción, indicadores y fuentes. Para entregar o presentar.</span></button>
+   <button data-exp="plan"><b>Plan de acción (CSV)</b><span>Objetivo, estrategia, táctica y tareas con fechas, responsables y recursos. Se abre en Excel.</span></button>
+   <button data-exp="traza"><b>Registro de trazabilidad (CSV)</b><span>Una fila por decisión con su origen y su indicador.</span></button>
+   <button data-exp="json"><b>Respaldo de datos (JSON)</b><span>Copia completa de los datos de esta empresa para guardar fuera de la app.</span></button>
+  </div><div id="frmErr" class="muted"></div></div>`;
+  $("#modal").hidden=false}
+async function exportJSON(){if(!S.dl)return;try{await S.dl.save({filename:`strategy-app-${S.eid}-${today()}.json`,data:JSON.stringify(snapshot("Respaldo"),null,1)});toast("Respaldo descargado")}catch(e){if(e&&e.code!=="declined")toast("No se pudo descargar en esta vista")}}
+function loadScript(src){return new Promise((ok,ko)=>{if(document.querySelector(`script[src="${src}"]`))return ok();const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>ko(new Error("No cargó "+src));document.head.appendChild(s)})}
+const PDF_LIGHT={paper:"#FFFFFF",surface:"#FFFFFF",sunk:"#F5F8F8",ink:"#13232A",muted:"#566A72",line:"#D3DDE0",accent:"#2350C8","accent-soft":"#E3EAFB",gold:"#9A6A12",ok:"#2C7A4B","ok-soft":"#E1F2E7",warn:"#A86A00","warn-soft":"#FBEFD6",bad:"#B8402B","bad-soft":"#F8E3DE","f-body":"Helvetica, Arial, sans-serif","f-mono":"Courier New, monospace","f-display":"Helvetica, Arial, sans-serif"};
+function svgPng(svg){return new Promise(res=>{
+  let src=svg.replace(/var\(--([a-z-]+)\)/g,(m,k)=>PDF_LIGHT[k]||"#000");if(!/xmlns=/.test(src))src=src.replace("<svg ",'<svg xmlns="http://www.w3.org/2000/svg" ');
+  const vb=(src.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/)||[0,600,300]);const w=+vb[1],h=+vb[2];
+  src=src.replace(/<svg ([^>]*?)width="100%"/,`<svg $1width="${w}" height="${h}"`).replace(/style="[^"]*"/,"");
+  const img=new Image();img.onload=()=>{const c=document.createElement("canvas");c.width=w*2;c.height=h*2;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);res({url:c.toDataURL("image/jpeg",0.9),w,h})};
+  img.onerror=()=>res(null);img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(src)})}
+const pdfTxt=t=>String(t??"").replace(/→/g,"->").replace(/←/g,"<-").replace(/×/g,"x").replace(/σ/g,"sigma").replace(/≥/g,">=").replace(/≤/g,"<=").replace(/[−–—]/g,"-").replace(/[’‘]/g,"'").replace(/[“”«»]/g,'"').replace(/…/g,"...").replace(/◆/g,"").replace(/ /g," ");
+async function exportPDF(btn){
+  if(!S.dl){toast("Esta vista no permite descargar archivos");return}
+  const lbl=btn.querySelector("b");const old=lbl.textContent;lbl.textContent="Generando PDF…";btn.disabled=true;
+  try{
+   await loadScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");await loadScript("https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js");
+   const C=compute(),e=S.emp,{jsPDF}=window.jspdf,doc=new jsPDF({unit:"pt",format:"letter"});
+   const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),L=48,R=W-48;let y=56;
+   const ink=[19,35,42],mut=[86,106,114],acc=[35,80,200];
+   const need=h=>{if(y+h>H-50){doc.addPage();y=56}};
+   const h1=t=>{need(40);doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(...acc);doc.text(pdfTxt(t),L,y);y+=8;doc.setDrawColor(...acc);doc.setLineWidth(1);doc.line(L,y,R,y);y+=16;doc.setTextColor(...ink)};
+   const h2=t=>{need(28);doc.setFont("helvetica","bold");doc.setFontSize(11.5);doc.setTextColor(...ink);doc.text(pdfTxt(t),L,y);y+=14};
+   const p=(t,sz=10,col=ink)=>{doc.setFont("helvetica","normal");doc.setFontSize(sz);doc.setTextColor(...col);const ls=doc.splitTextToSize(pdfTxt(t),R-L);ls.forEach(l=>{need(sz+4);doc.text(l,L,y);y+=sz+4});y+=4};
+   const bullets=I=>I.it.forEach(x=>{const tag={bad:"[Atención]",warn:"[Vigilar]",ok:"[A favor]",info:"[Dato]",acc:"[Conclusión]"}[x.n];doc.setFontSize(9.5);const ls=doc.splitTextToSize(pdfTxt(x.t),R-L-70);need(ls.length*13+2);doc.setFont("helvetica","bold");doc.setTextColor(...({bad:[184,64,43],warn:[168,106,0],ok:[44,122,75],info:mut,acc:acc})[x.n]);doc.text(tag,L,y);doc.setFont("helvetica","normal");doc.setTextColor(...ink);ls.forEach((l,i)=>doc.text(l,L+70,y+i*13));y+=ls.length*13+3});
+   const table=(head,body,opt={})=>{doc.autoTable({startY:y,head:[head.map(pdfTxt)],body:body.map(r=>r.map(c=>pdfTxt(c))),margin:{left:L,right:W-R},styles:{font:"helvetica",fontSize:8.2,cellPadding:3.5,textColor:ink,lineColor:[211,221,224],lineWidth:.4},headStyles:{fillColor:[245,248,248],textColor:mut,fontStyle:"bold"},theme:"grid",...opt});y=doc.lastAutoTable.finalY+14};
+   const img=async(svg,maxW,title)=>{const r=await svgPng(svg);if(!r)return;const w=Math.min(maxW||R-L,R-L),h=w*r.h/r.w;need(h+(title?30:8));if(title)h2(title);doc.addImage(r.url,"JPEG",L,y,w,h,undefined,"FAST");y+=h+12};
+   // Portada
+   doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...mut);doc.text("UNIVERSIDAD DE SAN BUENAVENTURA - BOGOTÁ · PROYECTO INTEGRADOR 2026-2",L,y);y+=30;
+   doc.setFontSize(26);doc.setTextColor(...ink);doc.text("Strategy App",L,y);y+=30;doc.setFontSize(18);doc.setTextColor(...acc);doc.text(pdfTxt("Diagnóstico estratégico: "+e.nombre),L,y);y+=20;
+   p(`${e.razon||""}${e.sector?" · "+e.sector:""}`,10,mut);if(e.corteDatos)p("Corte de datos macroeconómicos: "+e.corteDatos,10,mut);p("Informe generado el "+new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"})+" desde Strategy App.",9,mut);y+=6;
+   p("Ejercicio académico de aula. No constituye asesoría ni recomendación de inversión y no compromete a la Universidad ni a la empresa. "+(e.notaDatos||""),8.5,mut);
+   const sd=sintesisDatos(C);h1("1. Síntesis del diagnóstico");p(sd.parr,10.5);
+   table(["MEFE","MEFI","Posición","Estrategias","Tareas","Presupuesto","Indicadores en verde"],[[fmt(C.mefe),fmt(C.mefi),C.ie?C.ie.rom+" · "+C.ie.zona:"-",String(C.E.length),String(C.T.length),cop(C.presupuesto),`${C.K.filter(k=>k.sem==="ok").length} de ${C.K.length}`]]);
+   // Entorno
+   doc.addPage();y=56;h1("2. Módulo I · Entorno macroeconómico (Macroeconomía)");h2("Lectura automática");bullets(insightsI(C));
+   const V=[...C.V].sort(byCode);h2("Panorama macro y alarmas");
+   table(["Variable","Último dato","Movimiento","Semáforo","Se espera al cierre","Efecto para la empresa"],V.map(v=>[`${v.codigo} ${v.nombre}`,v.ultimo?`${fmtV(v,v.ultimo.v)} (${v.ultimo.p})${v.reciente&&v.reciente.corto?"\nReciente: "+v.reciente.corto:""}`:"-",v.movEf==null?"-":(v.movEf>0?"+":"")+fmt(v.movEf,2)+" "+unidadMov(v),v.vol?`${NIVEL_TXT[v.vol.nivel]} (${fmt(Math.abs(v.vol.z),1)}x lo típico)`:"Sin datos",v.pr.prox!=null?fmtV(v,v.pr.prox):"-",v.movEf?(Math.sign(v.movEf)*v.ef>0?"Favorable":"Desfavorable"):"-"]));
+   const R0=C.FX.rows;if(R0.length){h2(`Estados financieros simplificados (${e.finUnidad||"millones de COP"})`);
+    const fr=(l,f,d=0,s="")=>[l,...R0.map(r=>f(r)==null?"-":fmt(f(r),d)+s)];
+    table(["Concepto",...R0.map(r=>String(r.anio))],[fr("Ingresos",r=>r.ing),fr("Egresos",r=>r.egr),fr("Utilidad neta",r=>r.ut),fr("Activos",r=>r.A),fr("Pasivos",r=>r.Pa),fr("Patrimonio",r=>r.Pt),fr("Crecimiento real de ingresos",r=>r.real,1," %"),fr("Veces frente a la economía",r=>r.mult,1,"x"),fr("Margen neto",r=>r.margen,1," %"),fr("Endeudamiento",r=>r.endeud,0," %")])}
+   await img(heatSVG(C),300,"Mapa de riesgo macro");
+   h2("Matriz MEFE");table(["Código","Factor externo","Exposición","Volatilidad","Peso","Tipo","Calif.","Ponderado"],V.map(v=>[v.codigo,v.nombre,v.exp?EXP_TXT[v.exp.n]:"-",v.vol?NIVEL_TXT[v.vol.nivel]:"-",v.peso==null?"-":fmt(v.peso,3),v.tipo==="O"?"Oportunidad":v.tipo==="A"?"Amenaza":"-",v.calificacion||"-",fmt(v.pond,3)]).concat([["","Total","","",fmt(V.reduce((a,v)=>a+(v.peso||0),0),3),"","",fmt(C.mefe,3)]]));
+   if(C.P.length){h2("PESTEL");table(["Código","Dimensión","Factor","Tipo","Impacto","Fuente"],[...C.P].sort(byCode).map(x=>[x.codigo,(PESTEL.find(d=>d[0]===x.dimension)||[,""])[1],x.factor,x.tipo==="O"?"Oportunidad":"Amenaza",String(x.impacto||"-"),x.fuente||"-"]))}
+   // Interno
+   doc.addPage();y=56;h1("3. Módulo II · Diagnóstico interno (Planeación Estratégica)");h2("Lectura automática");bullets(insightsII(C));
+   h2("Matriz MEFI");table(["Código","Tipo","Factor","Eslabón","Peso","Calif.","Ponderado"],[...C.F].sort(byCode).map(f=>[f.codigo,f.tipo==="D"?"Debilidad":"Fortaleza",f.factor,([...ESLABONES,...APOYO].find(x=>x[0]===f.eslabon)||[,"-"])[1],fmt(f.p,2),String(f.c??"-"),fmt(f.pond,2)]).concat([["","","Total","",fmt(C.sumPesoF),"",fmt(C.mefi)]]));
+   if(C.U.length){h2(`Matriz BCG (corte de crecimiento ${fmt(C.bcg.corte,1)} %)`);p(C.bcg.why,9,mut);await img(bcgSVG(C.U,C.bcg.corte),280);table(["Código","Unidad","Crecimiento %","Part. relativa","Cuadrante"],[...C.U].sort(byCode).map(u=>[u.codigo,u.nombre,fmt(u.g,1),fmt(u.q,2),u.cuad||"-"]))}
+   if(e.adlMadurez&&e.adlPosicion){h2("Matriz ADL");p(`Sector en ${ADL_M.find(x=>x[0]===e.adlMadurez)[1].toLowerCase()}, posición ${ADL_P.find(x=>x[0]===e.adlPosicion)[1].toLowerCase()}: ${ADL_TXT[ADL_Z[e.adlPosicion][ADL_M.findIndex(x=>x[0]===e.adlMadurez)]]}.`)}
+   await img(ieSVG(C.ie,C.mefe,C.mefi),250,"Posición estratégica (MEFE x MEFI)");
+   if(e.conclusiones){h2("Conclusiones del diagnóstico");p(e.conclusiones)}
+   // Plan
+   doc.addPage();y=56;h1("4. Módulo III · Formulación y plan de acción (Gerencia Estratégica)");h2("Lectura automática");bullets(insightsIII(C));
+   const E=[...C.E].sort(byCode);h2("Estrategias");table(["Código","Objetivo","Estrategia","Tipo","Origen","Presupuesto","Plazo"],E.map(s=>[s.codigo,s.objetivo||"-",s.estrategia||"-",s.tipo||"-",[...s.vs.map(v=>v.codigo),...s.ps.map(x=>x.codigo),...s.fs.map(f=>f.codigo)].join(", ")||"-",cop(num(s.presupuesto)),`${fDate(s.inicio)} - ${fDate(s.fin)}`]));
+   h2("Plan de acción");const rows=[];E.forEach(s=>tacticasDe(s).forEach(tc=>{const ts=s.ts.filter(x=>x.tactica===tc);if(!ts.length)rows.push([s.codigo,tc,"(sin tareas)","","","",""]);ts.forEach(t=>rows.push([s.codigo,tc,`${t.codigo} ${t.tarea}`,fDate(t.inicio),fDate(t.fin),t.responsable||"-",t.recursos||"-"]))}));
+   table(["Estrategia","Táctica","Tarea","Inicio","Cierre","Responsable","Recursos"],rows,{styles:{font:"helvetica",fontSize:7.6,cellPadding:3,textColor:ink,lineColor:[211,221,224],lineWidth:.4}});
+   h2("Indicadores de seguimiento");table(["Código","Indicador","Fórmula","Estrategia","Base","Meta","Medido","Cumplimiento","Semáforo"],[...C.K].sort(byCode).map(k=>[k.codigo,k.nombre,`${k.numerador||"-"} / ${k.denominador||"-"}`,k.est?k.est.codigo:"-",fmt(num(k.lineaBase),1),fmt(num(k.meta),1),fmt(num(k.actual),1),k.prog==null?"-":fmt(k.prog*100,0)+" %",{ok:"Verde",warn:"Amarillo",bad:"Rojo",sin:"Sin medición"}[k.sem]]),
+    {didParseCell:d=>{if(d.section==="body"&&d.column.index===8){const v=d.cell.raw;d.cell.styles.textColor=v==="Verde"?[44,122,75]:v==="Amarillo"?[168,106,0]:v==="Rojo"?[184,64,43]:mut;d.cell.styles.fontStyle="bold"}}});
+   // Trazabilidad
+   h1("5. Registro de trazabilidad");table(["Decisión","Variable del entorno","PESTEL","Factor interno","Indicador","Estado"],E.map(s=>[`${s.codigo} ${s.estrategia}`,s.vs.map(v=>v.codigo+" "+v.nombre).join("; ")||"-",s.ps.map(x=>x.codigo).join(", ")||"-",s.fs.map(f=>f.codigo+" "+f.factor).join("; ")||"-",s.ks.map(k=>k.codigo+" "+k.nombre).join("; ")||"-",s.rev?"En revisión":"Vigente"]));
+   // Fuentes
+   h1("6. Fuentes de las cifras macro y proyecciones");table(["Variable","Fuente","Serie / corte","Consulta","Estado"],V.map(v=>[`${v.codigo} ${v.nombre}`,v.fuente||"-",`${v.serieNombre||""} · ${v.corte||""}`,v.fechaConsulta||"-",v.verificacion==="verificado"?"Fuente oficial verificada":v.verificacion==="ilustrativo"?"Ilustrativo":"Por verificar"]));
+   const host=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch(_){return"-"}};const allP=V.flatMap(v=>(v.proy||[]).map(x=>[`${v.codigo} ${v.nombre}`,x.org,x.fecha||"-",x.horizonte,fmtV(v,num(x.valor)),x.tipo==="promedio"?"Promedio anual":x.tipo==="anual"?"Crecimiento anual":"Cierre de año",x.url?host(x.url):"-"]));if(allP.length){h2("Proyecciones de organismos y analistas");table(["Variable","Fuente","Publicación","Horizonte","Valor","Tipo","Medio consultado"],allP)}
+   // pie de página
+   const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(...mut);doc.text(pdfTxt(`Strategy App · ${e.nombre} · Ejercicio académico USB Bogotá`),L,H-24);doc.text(`${i} / ${n}`,R,H-24,{align:"right"})}
+   const blob=doc.output("blob");await S.dl.save({filename:`Strategy-App-${S.eid}-${today()}.pdf`,data:blob});toast("PDF generado")}
+  catch(err){if(!(err&&err.code==="declined")){console.error(err);const m=$("#frmErr");if(m)m.textContent="No se pudo generar el PDF: "+(err&&err.message||err.code||err)}}
+  finally{lbl.textContent=old;btn.disabled=false}}
+
+/* ---------- eventos ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-glos],[data-paso],[data-asig-pick],[data-menu],#btnMenu,[data-tab],[data-new],[data-newtask],[data-sug],[data-exp],[data-restaurar],[data-borrarcopia],#btnCopias,[data-edit],[data-act],#btnDel,#btnNewEmp,#btnEditEmp,#btnExport");if(!t)return;
+  if(t.dataset.newtask){e.stopPropagation();openForm("tareas",null,{estrategia:t.dataset.newtask,tactica:t.dataset.tac});return}
+  if(t.dataset.act==="exportPlan"){exportPlan();return}
+  if(t.dataset.act==="editFin"){if(S.emp)openFin();return}
+  if(t.dataset.act==="menu"){abrirMenu();return}
+  if(t.dataset.act==="guiaOk"){S.guiaVista=true;try{localStorage.setItem("sa_guia","1")}catch(_){}if(S.tab==="guia")S.tab=S.asig?ASIG_TAB[S.asig]:"entorno";render();window.scrollTo({top:0});return}
+  if(t.dataset.act==="verGuia"){S.tab="guia";render();window.scrollTo({top:0});return}
+  if(t.dataset.glos){abrirGlos(t.dataset.glos);return}
+  if(t.dataset.paso){S.pasoSel[t.dataset.asig]=+t.dataset.paso;render();return}
+  if(t.dataset.asigPick){const a=t.dataset.asigPick;if(a==="__ver"){S.welcomeSkip=true;S.tab="sintesis"}else{S.asig=a;S.tab=ASIG_TAB[a];try{localStorage.setItem("sa_asig",a)}catch(_){}}try{localStorage.setItem("sa_tab",S.tab)}catch(_){}render();return}
+  if(t.dataset.menu){const m=t.dataset.menu;closeModal();if(m==="editEmp")openForm("empresa");else if(m==="newEmp")openForm("empresa","__new");else if(m==="exportar")abrirExportar();else if(m==="copias")abrirCopias();else if(m==="asig"){S.asig=null;S.welcomeSkip=false;try{localStorage.removeItem("sa_asig")}catch(_){}render()}else if(m.startsWith("tab:")){S.tab=m.slice(4);try{localStorage.setItem("sa_tab",S.tab)}catch(_){}render();window.scrollTo({top:0})}return}
+  if(t.dataset.exp){const k=t.dataset.exp;if(k==="pdf")exportPDF(t);else if(k==="plan")exportPlan();else if(k==="traza")exportar();else exportJSON();return}
+  if(t.dataset.act==="guardarCopia"){guardarCopia();return}
+  if(t.dataset.restaurar){restaurarCopia(t.dataset.restaurar,t);return}
+  if(t.dataset.borrarcopia){borrarCopia(t.dataset.borrarcopia,t);return}
+  if(t.dataset.act==="copySint"){const txt=t.closest(".card").querySelector("p").textContent;try{navigator.clipboard.writeText(txt).then(()=>toast("Texto copiado"),()=>toast("Selecciona el texto y cópialo manualmente"))}catch(_){toast("Selecciona el texto y cópialo manualmente")}return}
+  if(t.dataset.sug!=null){const g=sugerenciasMEFI(compute())[+t.dataset.sug];if(g)openForm("internos",null,{tipo:g.tipo,eslabon:g.eslabon,factor:g.factor,evidencia:g.evidencia,origen:g.clave});return}
+  if(t.dataset.tab){S.tab=t.dataset.tab;try{localStorage.setItem("sa_tab",S.tab)}catch(_){}render();window.scrollTo({top:0});return}
+  if(t.dataset.new){openForm(t.dataset.new);return}
+  if(t.dataset.edit){openForm(t.dataset.edit,t.dataset.id);return}
+  if(t.id==="btnDel"){delItem();return}
+  if(t.id==="btnNewEmp"||t.dataset.act==="newEmp"){if(S.db)openForm("empresa","__new");return}
+  if(t.id==="btnEditEmp"||t.dataset.act==="editEmp"){if(S.emp)openForm("empresa");return}
+  if(t.id==="btnExport"){if(S.emp)abrirExportar();return}
+  if(t.id==="btnCopias"){abrirCopias();return}
+  if(t.id==="btnMenu"){abrirMenu();return}
+  const a=t.dataset.act;
+  if(a==="close"){closeModal();return}
+  if(a==="retry"){boot();return}
+  if(a==="sim"){S.sim={vid:$("#simV").value,shock:$("#simX").value};render();return}
+  if(a==="simClear"){S.sim={vid:"",shock:""};render();return}
+});
+document.addEventListener("submit",e=>{if(e.target.id==="frm"){e.preventDefault();saveForm()}if(e.target.id==="frmFin"){e.preventDefault();saveFin()}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&M)closeModal()});
+$("#modal").addEventListener("mousedown",e=>{if(e.target.id==="modal")closeModal()});
+$("#empSel").addEventListener("change",e=>selectEmp(e.target.value));
+document.addEventListener("toggle",e=>{const d=e.target;if(d&&d.dataset&&d.dataset.det)S.det[d.dataset.det]=d.open},true);
+document.addEventListener("change",e=>{if(e.target.id==="focusE"){S.focusE=e.target.value||null;render()}});
+document.addEventListener("click",e=>{const g=e.target.closest&&e.target.closest("[data-focus]");if(g){S.focusE=S.focusE===g.dataset.focus?null:g.dataset.focus;render()}});
+
+/* ---------- arranque ---------- */
+// Cada capacidad se pide por separado y nunca bloquea a las demás: si una falla o no responde, la app sigue.
+function useCap(n){try{if(!window.claude||typeof window.claude.use!=="function")return Promise.resolve(null);return Promise.resolve(window.claude.use(n)).catch(()=>null)}catch(e){return Promise.resolve(null)}}
+function showConnError(msg){const v=$("#view");v.innerHTML=`<div class="empty"><h2 style="margin-bottom:6px">No se pudo cargar la información</h2><p>${esc(msg)}</p><button class="pri" data-act="retry">Reintentar</button></div>`}
+let booted=false,connected=false,unsubEmp=null;
+window.addEventListener("error",ev=>{if(!connected&&!booted)showConnError("Ocurrió un error al iniciar la app: "+(ev.message||"desconocido"))});
+renderTabs();
+async function boot(){
+  booted=false;connected=false;if(unsubEmp){try{unsubEmp()}catch(e){}unsubEmp=null}
+  $("#view").innerHTML='<div class="empty">Conectando con la base de datos del proyecto…</div>';
+  const guard=setTimeout(()=>{if(!connected)showConnError("La base de datos no respondió. Verifica que estés con sesión iniciada en claude.ai y vuelve a intentar.")},15000);
+  useCap("downloads").then(dl=>{S.dl=dl;if(dl)$("#btnExport").hidden=false});
+  useCap("user").then(async user=>{if(!user)return;S.user=user;try{S.uid=await user.id()}catch(_){}try{const w=await user.can("data.write");if(w===false){S.canWrite=false;$("#btnNewEmp").hidden=true;if(S.emp)render()}}catch(e){}});
+  const db=await useCap("db");booted=true;
+  S.db=db;
+  if(!db){clearTimeout(guard);connected=true;render();return}
+  let first=true;
+  try{unsubEmp=db.collection("empresas").onSnapshot(q=>{connected=true;clearTimeout(guard);
+    S.empresas=q.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.orden??a.nombre).localeCompare(String(b.orden??b.nombre)));
+    if(first||!S.empresas.some(x=>x.id===S.eid)){first=false;let saved=null;try{saved=localStorage.getItem("sa_emp")}catch(e){}
+      const pick=S.empresas.find(x=>x.id===saved)?saved:(S.empresas[0]?.id||null);
+      if(pick!==S.eid)selectEmp(pick);else{renderEmpSel();render()}}
+    else{renderEmpSel();schedule()}
+  },err=>{clearTimeout(guard);connected=true;showConnError("La conexión con la base de datos se interrumpió"+(err&&err.code?" ("+err.code+")":"")+".")})}
+  catch(e){clearTimeout(guard);connected=true;showConnError("No se pudo abrir la base de datos: "+(e&&e.message||e))}
+}
+boot();
+</script>

@@ -1,0 +1,52 @@
+STRATEGY APP · PAQUETE DEL PROYECTO
+Proyecto integrador 2026-2 · Universidad de San Buenaventura, Bogotá
+Macroeconomía · Planeación Estratégica · Gerencia Estratégica
+Versión 12 · corte de datos: 26 de octubre de 2026
+
+VERSIÓN DE TRABAJO EN LÍNEA
+La app oficial está publicada en claude.ai:
+https://claude.ai/artifact/MXAdhiQ9vkULpwXp7AuHsJ
+Allí está la base de datos compartida: lo que guarda un curso lo ven los demás en vivo.
+Para editar, cada estudiante debe estar invitado por correo con permiso de edición.
+
+CONTENIDO DEL PAQUETE
+
+1_app
+  Strategy-App_sin-conexion.html
+    Ábrala con doble clic en cualquier navegador (Chrome, Edge, Firefox).
+    Funciona sin cuenta y sin base de datos externa, con los datos del corte
+    del 26-oct-2026 ya cargados. Sirve como respaldo para presentar, por
+    ejemplo en ExpoSanBuena si falla la conexión.
+    Importante: los cambios que se hagan en esta copia se pierden al cerrarla.
+    Para exportar a PDF necesita internet (descarga la librería de PDF).
+  Strategy-App_codigo-fuente.html
+    El código de la app tal como está publicado en claude.ai. Solo funciona
+    dentro de claude.ai, porque allí recibe la base de datos compartida.
+
+2_datos
+  respaldo_juan-valdez_corte-2026-10-26.json
+  respaldo_seguros-sura_corte-2026-10-26.json
+    Copia completa de los datos de cada empresa en el corte (variables,
+    proyecciones, estados financieros, MEFI, BCG, estrategias, tareas e
+    indicadores). La misma copia está guardada dentro de la app en
+    Menú > Copias guardadas > "Corte 26-oct-2026 · versión de cierre auditada".
+  base-de-datos-completa_corte-2026-10-26.json
+    Toda la base de datos de la app en esa fecha (91 documentos).
+
+3_informes
+  Informes en PDF generados por la app para cada empresa (9 páginas).
+
+4_documentos
+  Como_se_construyo_Strategy_App.docx: bitácora del proceso para estudiantes.
+  Documento_sustentacion_Proyecto_Integrador.docx: documento de partida.
+  auditoria_calculos_2026-10-26.txt: resultado del recálculo independiente
+    (214 verificaciones, 0 diferencias).
+
+ESTADO DE LOS DATOS
+- Series macro (DANE, Banco de la República) y proyecciones (FMI, Banco
+  Mundial, OCDE, Banco de la República, encuesta de analistas): con fuente y
+  fecha. Los trimestres de 2022 a 2025 siguen POR VERIFICAR contra la serie
+  oficial.
+- Estados financieros, MEFI, BCG, presupuestos, tareas e indicadores:
+  ILUSTRATIVOS hasta que los equipos carguen las cifras reales.
+- Ejercicio académico de aula: no es asesoría ni recomendación de inversión.
